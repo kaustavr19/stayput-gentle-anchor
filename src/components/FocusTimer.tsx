@@ -6,10 +6,10 @@ interface FocusTimerProps {
 export function FocusTimer({ formattedTime }: FocusTimerProps) {
   return (
     <div className="text-center">
-      <div className="text-5xl font-light text-foreground tracking-tight tabular-nums">
+      <div className="text-6xl font-extralight text-foreground/90 tracking-tight tabular-nums">
         {formattedTime}
       </div>
-      <p className="text-xs text-text-muted mt-3 uppercase tracking-wide">
+      <p className="text-xs text-text-muted/50 mt-4 uppercase tracking-widest">
         elapsed
       </p>
     </div>
