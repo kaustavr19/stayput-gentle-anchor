@@ -1,0 +1,124 @@
+import { useState, useCallback } from 'react';
+import { Note } from '@/types';
+import { Button } from '@/components/ui/button';
+import { Plus, Trash2 } from 'lucide-react';
+import { format } from 'date-fns';
+
+interface NotepadProps {
+  notes: Note[];
+  onAdd: (content: string) => void;
+  onDelete: (id: string) => void;
+}
+
+export function Notepad({ notes, onAdd, onDelete }: NotepadProps) {
+  const [newNote, setNewNote] = useState('');
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const handleAdd = useCallback(() => {
+    if (!newNote.trim()) return;
+    onAdd(newNote);
+    setNewNote('');
+    setIsExpanded(false);
+  }, [newNote, onAdd]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey && newNote.trim()) {
+      e.preventDefault();
+      handleAdd();
+    }
+    if (e.key === 'Escape') {
+      setIsExpanded(false);
+      setNewNote('');
+    }
+  }, [handleAdd, newNote]);
+
+  return (
+    <div className="h-full flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h3 className="text-sm font-medium text-foreground">Notepad</h3>
+          <p className="text-xs text-text-muted">Park your thoughts</p>
+        </div>
+        {!isExpanded && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsExpanded(true)}
+            className="h-8 w-8"
+          >
+            <Plus className="w-4 h-4" />
+          </Button>
+        )}
+      </div>
+
+      {/* New note input */}
+      {isExpanded && (
+        <div className="mb-4 animate-slide-up">
+          <textarea
+            value={newNote}
+            onChange={(e) => setNewNote(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Dump a thought..."
+            rows={3}
+            autoFocus
+            className="w-full bg-surface border border-border/20 rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-text-muted focus:outline-none focus:border-primary/40 resize-none"
+          />
+          <div className="flex justify-end gap-2 mt-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setIsExpanded(false);
+                setNewNote('');
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleAdd}
+              disabled={!newNote.trim()}
+            >
+              Save
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Notes list */}
+      <div className="flex-1 overflow-y-auto space-y-3 min-h-0">
+        {notes.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-sm text-text-muted">No thoughts yet.</p>
+            <p className="text-xs text-text-muted/70 mt-1">
+              That's probably fine.
+            </p>
+          </div>
+        ) : (
+          notes.map((note) => (
+            <div
+              key={note.id}
+              className="group bg-surface border border-border/10 rounded-lg p-3 hover:border-border/20 transition-colors"
+            >
+              <div className="flex items-start gap-2">
+                <p className="flex-1 text-sm text-text-secondary whitespace-pre-wrap">
+                  {note.content}
+                </p>
+                <button
+                  onClick={() => onDelete(note.id)}
+                  className="opacity-0 group-hover:opacity-100 text-text-muted hover:text-destructive transition-all p-1"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              <p className="text-xs text-text-muted mt-2">
+                {format(new Date(note.createdAt), 'MMM d, h:mm a')}
+              </p>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
