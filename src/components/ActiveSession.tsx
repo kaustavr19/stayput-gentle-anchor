@@ -31,18 +31,18 @@ export function ActiveSession({ session, elapsedTime, formattedTime, onEnd }: Ac
 
   if (showReflection) {
     return (
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-8 animate-fade-in">
         {/* Session summary */}
-        <div className="bg-surface border border-border/20 rounded-lg p-4">
-          <p className="text-sm text-text-muted mb-1">You focused on</p>
-          <p className="text-lg text-foreground font-medium">{session.taskName}</p>
-          <p className="text-sm text-text-secondary mt-2">for {formattedTime}</p>
+        <div className="writing-space rounded-xl p-6">
+          <p className="text-xs text-text-muted uppercase tracking-wide mb-2">You focused on</p>
+          <p className="text-xl text-foreground font-medium leading-relaxed">{session.taskName}</p>
+          <p className="text-sm text-text-secondary mt-3">for {formattedTime}</p>
         </div>
 
         {/* Reflection question */}
-        <div className="space-y-3">
-          <p className="text-sm text-text-muted">Did you finish this?</p>
-          <div className="flex gap-2">
+        <div className="space-y-4">
+          <p className="text-sm text-text-secondary">Did you finish?</p>
+          <div className="flex gap-3">
             {[
               { value: 'yes', label: 'Yes', icon: Check },
               { value: 'partially', label: 'Partially', icon: Minus },
@@ -51,11 +51,14 @@ export function ActiveSession({ session, elapsedTime, formattedTime, onEnd }: Ac
               <button
                 key={value}
                 onClick={() => setCompleted(value as typeof completed)}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg transition-all ${
-                  completed === value
-                    ? 'bg-accent-soft text-accent-primary border border-primary/30'
-                    : 'bg-surface text-text-secondary hover:text-foreground border border-border/20 hover:border-border/40'
-                }`}
+                className={`
+                  flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl 
+                  transition-all duration-200
+                  ${completed === value
+                    ? 'bg-primary/10 text-primary border border-primary/20'
+                    : 'bg-card/50 text-text-secondary hover:text-foreground border border-border/20 hover:border-border/40 hover:bg-card'
+                  }
+                `}
               >
                 <Icon className="w-4 h-4" />
                 {label}
@@ -65,21 +68,21 @@ export function ActiveSession({ session, elapsedTime, formattedTime, onEnd }: Ac
         </div>
 
         {/* Optional note */}
-        <div className="space-y-2">
-          <label className="text-sm text-text-muted">
-            Quick note <span className="text-text-muted/60">(optional)</span>
+        <div className="space-y-3">
+          <label className="text-xs text-text-muted uppercase tracking-wide">
+            Quick note
           </label>
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="Anything worth remembering?"
             rows={2}
-            className="w-full bg-surface border border-border/20 rounded-lg px-4 py-3 text-foreground placeholder:text-text-muted focus:outline-none focus:border-primary/40 resize-none"
+            className="w-full bg-card/60 backdrop-blur-sm border border-border/30 rounded-xl px-5 py-4 text-foreground placeholder:text-text-muted/60 focus:outline-none focus:border-primary/30 resize-none shadow-sm"
           />
         </div>
 
         {/* Actions */}
-        <div className="flex gap-3">
+        <div className="flex gap-3 pt-2">
           <Button variant="ghost" onClick={handleSkip} className="flex-1">
             Skip
           </Button>
@@ -92,28 +95,26 @@ export function ActiveSession({ session, elapsedTime, formattedTime, onEnd }: Ac
   }
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      {/* Current task - pinned at top */}
-      <div className="bg-surface border border-border/20 rounded-lg p-5">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            <p className="text-xs text-text-muted uppercase tracking-wide mb-2">
-              Currently focusing on
-            </p>
-            <h2 className="text-xl font-medium text-foreground truncate">
-              {session.taskName}
-            </h2>
-            {session.context && (
-              <span className="inline-block mt-2 px-2 py-0.5 text-xs text-text-secondary bg-bg-secondary rounded">
-                {session.context}
-              </span>
-            )}
-          </div>
+    <div className="space-y-10 animate-fade-in">
+      {/* Current task — pinned, editorial */}
+      <div className="writing-space rounded-xl p-6">
+        <div className="space-y-3">
+          <p className="text-xs text-text-muted uppercase tracking-wide">
+            Currently focused on
+          </p>
+          <h2 className="text-2xl font-medium text-foreground leading-relaxed">
+            {session.taskName}
+          </h2>
+          {session.context && (
+            <span className="inline-block mt-1 px-3 py-1 text-xs text-text-secondary bg-surface/50 rounded-lg border border-border/10">
+              {session.context}
+            </span>
+          )}
         </div>
       </div>
 
-      {/* Timer */}
-      <div className="flex justify-center py-4">
+      {/* Timer — centered, calm */}
+      <div className="flex justify-center py-6">
         <FocusTimer elapsedSeconds={elapsedTime} formattedTime={formattedTime} />
       </div>
 
@@ -131,9 +132,9 @@ export function ActiveSession({ session, elapsedTime, formattedTime, onEnd }: Ac
         </Button>
       </div>
 
-      {/* Ambient message */}
-      <p className="text-xs text-text-muted text-center font-serif italic">
-        "The work will show you the way."
+      {/* Ambient quote */}
+      <p className="text-sm text-text-muted text-center font-serif italic pt-4">
+        The work will show you the way.
       </p>
     </div>
   );

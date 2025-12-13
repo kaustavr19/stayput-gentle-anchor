@@ -35,10 +35,10 @@ export function Notepad({ notes, onAdd, onDelete }: NotepadProps) {
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-5">
         <div>
           <h3 className="text-sm font-medium text-foreground">Notepad</h3>
-          <p className="text-xs text-text-muted">Park your thoughts</p>
+          <p className="text-xs text-text-muted mt-0.5">Park your thoughts</p>
         </div>
         {!isExpanded && (
           <Button
@@ -54,7 +54,7 @@ export function Notepad({ notes, onAdd, onDelete }: NotepadProps) {
 
       {/* New note input */}
       {isExpanded && (
-        <div className="mb-4 animate-slide-up">
+        <div className="mb-5 animate-slide-up">
           <textarea
             value={newNote}
             onChange={(e) => setNewNote(e.target.value)}
@@ -62,9 +62,9 @@ export function Notepad({ notes, onAdd, onDelete }: NotepadProps) {
             placeholder="Dump a thought..."
             rows={3}
             autoFocus
-            className="w-full bg-surface border border-border/20 rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-text-muted focus:outline-none focus:border-primary/40 resize-none"
+            className="w-full bg-card/60 border border-border/20 rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-text-muted/60 focus:outline-none focus:border-primary/30 resize-none"
           />
-          <div className="flex justify-end gap-2 mt-2">
+          <div className="flex justify-end gap-2 mt-3">
             <Button
               variant="ghost"
               size="sm"
@@ -89,9 +89,9 @@ export function Notepad({ notes, onAdd, onDelete }: NotepadProps) {
       {/* Notes list */}
       <div className="flex-1 overflow-y-auto space-y-3 min-h-0">
         {notes.length === 0 ? (
-          <div className="text-center py-8">
+          <div className="text-center py-10">
             <p className="text-sm text-text-muted">No thoughts yet.</p>
-            <p className="text-xs text-text-muted/70 mt-1">
+            <p className="text-xs text-text-muted/60 mt-1">
               That's probably fine.
             </p>
           </div>
@@ -99,10 +99,10 @@ export function Notepad({ notes, onAdd, onDelete }: NotepadProps) {
           notes.map((note) => (
             <div
               key={note.id}
-              className="group bg-surface border border-border/10 rounded-lg p-3 hover:border-border/20 transition-colors"
+              className="group bg-card/40 border border-border/10 rounded-lg p-4 hover:border-border/20 transition-colors"
             >
-              <div className="flex items-start gap-2">
-                <p className="flex-1 text-sm text-text-secondary whitespace-pre-wrap">
+              <div className="flex items-start gap-3">
+                <p className="flex-1 text-sm text-text-secondary whitespace-pre-wrap leading-relaxed">
                   {note.content}
                 </p>
                 <button
@@ -112,7 +112,7 @@ export function Notepad({ notes, onAdd, onDelete }: NotepadProps) {
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </div>
-              <p className="text-xs text-text-muted mt-2">
+              <p className="text-xs text-text-muted/70 mt-3">
                 {format(new Date(note.createdAt), 'MMM d, h:mm a')}
               </p>
             </div>

@@ -15,11 +15,11 @@ export function SessionHistory({ sessions }: SessionHistoryProps) {
   const getCompletionIcon = (completed?: 'yes' | 'partially' | 'no') => {
     switch (completed) {
       case 'yes':
-        return <Check className="w-3.5 h-3.5 text-green-400" />;
+        return <Check className="w-3.5 h-3.5 text-green-500" />;
       case 'partially':
-        return <Minus className="w-3.5 h-3.5 text-yellow-400" />;
+        return <Minus className="w-3.5 h-3.5 text-amber-500" />;
       case 'no':
-        return <X className="w-3.5 h-3.5 text-red-400" />;
+        return <X className="w-3.5 h-3.5 text-text-muted" />;
       default:
         return null;
     }
@@ -36,67 +36,76 @@ export function SessionHistory({ sessions }: SessionHistoryProps) {
     return `${hrs}h ${remainingMins}m`;
   };
 
+  if (completedSessions.length === 0) {
+    return (
+      <div className="space-y-8 animate-fade-in">
+        <div className="space-y-2">
+          <h1 className="text-2xl font-medium text-foreground tracking-tight">History</h1>
+          <p className="text-text-muted text-sm">Your completed sessions will appear here.</p>
+        </div>
+
+        <div className="text-center py-16">
+          <p className="text-sm text-text-muted">No sessions yet.</p>
+          <p className="text-xs text-text-muted/60 mt-1">
+            Start one when you're ready.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="mb-4">
-        <h3 className="text-sm font-medium text-foreground">History</h3>
-        <p className="text-xs text-text-muted">Recent focus sessions</p>
+    <div className="space-y-8 animate-fade-in">
+      <div className="space-y-2">
+        <h1 className="text-2xl font-medium text-foreground tracking-tight">History</h1>
+        <p className="text-text-muted text-sm">{completedSessions.length} sessions completed</p>
       </div>
 
-      {/* Sessions list */}
-      <div className="flex-1 overflow-y-auto space-y-2 min-h-0">
-        {completedSessions.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-sm text-text-muted">No sessions yet.</p>
-            <p className="text-xs text-text-muted/70 mt-1">
-              Start focusing to build your history.
-            </p>
-          </div>
-        ) : (
-          completedSessions.map((session) => (
-            <div
-              key={session.id}
-              className="bg-surface border border-border/10 rounded-lg p-3 hover:border-border/20 transition-colors"
-            >
-              <div className="flex items-start gap-3">
-                {/* Completion status */}
-                <div className="mt-0.5">
-                  {session.reflection ? (
-                    getCompletionIcon(session.reflection.completed)
-                  ) : (
-                    <Clock className="w-3.5 h-3.5 text-text-muted" />
-                  )}
-                </div>
+      <div className="space-y-3">
+        {completedSessions.map((session) => (
+          <div
+            key={session.id}
+            className="writing-space rounded-xl p-5"
+          >
+            <div className="flex items-start gap-4">
+              {/* Completion status */}
+              <div className="mt-1">
+                {session.reflection ? (
+                  getCompletionIcon(session.reflection.completed)
+                ) : (
+                  <Clock className="w-3.5 h-3.5 text-text-muted" />
+                )}
+              </div>
+              
+              <div className="flex-1 min-w-0">
+                <h3 className="text-foreground font-medium truncate">
+                  {session.taskName}
+                </h3>
                 
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-foreground truncate">
-                    {session.taskName}
-                  </p>
-                  <div className="flex items-center gap-2 mt-1 text-xs text-text-muted">
-                    <span>{getDuration(session)}</span>
-                    <span>·</span>
-                    <span>
-                      {formatDistanceToNow(new Date(session.endedAt!), { addSuffix: true })}
-                    </span>
-                  </div>
-                  {session.reflection?.note && (
-                    <p className="text-xs text-text-secondary mt-2 italic">
-                      "{session.reflection.note}"
-                    </p>
-                  )}
-                </div>
-
-                {/* Context tag */}
                 {session.context && (
-                  <span className="text-xs text-text-muted bg-bg-secondary px-2 py-0.5 rounded">
+                  <span className="inline-block mt-2 px-2 py-0.5 text-xs text-text-muted bg-surface/50 rounded">
                     {session.context}
                   </span>
                 )}
+                
+                {session.reflection?.note && (
+                  <p className="text-sm text-text-secondary mt-3 font-serif italic leading-relaxed">
+                    "{session.reflection.note}"
+                  </p>
+                )}
+              </div>
+              
+              <div className="text-right shrink-0">
+                <p className="text-sm text-text-secondary tabular-nums">
+                  {getDuration(session)}
+                </p>
+                <p className="text-xs text-text-muted mt-1">
+                  {formatDistanceToNow(new Date(session.endedAt!), { addSuffix: true })}
+                </p>
               </div>
             </div>
-          ))
-        )}
+          </div>
+        ))}
       </div>
     </div>
   );
