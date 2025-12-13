@@ -31,12 +31,12 @@ export function ActiveSession({ session, elapsedTime, formattedTime, onEnd }: Ac
 
   if (showReflection) {
     return (
-      <div className="space-y-8 animate-fade-in">
+      <div className="space-y-10 animate-fade-in">
         {/* Session summary */}
-        <div className="writing-space rounded-xl p-6">
-          <p className="text-xs text-text-muted uppercase tracking-wide mb-2">You focused on</p>
-          <p className="text-xl text-foreground font-medium leading-relaxed">{session.taskName}</p>
-          <p className="text-sm text-text-secondary mt-3">for {formattedTime}</p>
+        <div className="space-y-3 pt-4">
+          <p className="text-xs text-text-muted/70 uppercase tracking-widest">You focused on</p>
+          <p className="text-xl text-foreground font-light leading-relaxed">{session.taskName}</p>
+          <p className="text-sm text-text-muted">for {formattedTime}</p>
         </div>
 
         {/* Reflection question */}
@@ -55,8 +55,8 @@ export function ActiveSession({ session, elapsedTime, formattedTime, onEnd }: Ac
                   flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl 
                   transition-all duration-200
                   ${completed === value
-                    ? 'bg-primary/10 text-primary border border-primary/20'
-                    : 'bg-card/50 text-text-secondary hover:text-foreground border border-border/20 hover:border-border/40 hover:bg-card'
+                    ? 'bg-foreground/10 text-foreground border border-foreground/20'
+                    : 'bg-transparent text-text-muted hover:text-text-secondary border border-border/20 hover:border-border/40'
                   }
                 `}
               >
@@ -69,24 +69,24 @@ export function ActiveSession({ session, elapsedTime, formattedTime, onEnd }: Ac
 
         {/* Optional note */}
         <div className="space-y-3">
-          <label className="text-xs text-text-muted uppercase tracking-wide">
+          <p className="text-xs text-text-muted/70 uppercase tracking-widest">
             Quick note
-          </label>
+          </p>
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="Anything worth remembering?"
             rows={2}
-            className="w-full bg-card/60 backdrop-blur-sm border border-border/30 rounded-xl px-5 py-4 text-foreground placeholder:text-text-muted/60 focus:outline-none focus:border-primary/30 resize-none shadow-sm"
+            className="w-full bg-card/40 backdrop-blur-sm border border-border/20 rounded-xl px-6 py-4 text-foreground placeholder:text-text-muted/50 focus:outline-none focus:border-border/40 resize-none transition-all duration-300"
           />
         </div>
 
         {/* Actions */}
-        <div className="flex gap-3 pt-2">
-          <Button variant="ghost" onClick={handleSkip} className="flex-1">
+        <div className="flex gap-3 pt-4">
+          <Button variant="ghost" onClick={handleSkip} className="flex-1 text-text-muted">
             Skip
           </Button>
-          <Button onClick={handleFinish} className="flex-1">
+          <Button onClick={handleFinish} className="flex-1 bg-primary/80 hover:bg-primary/90">
             Done
           </Button>
         </div>
@@ -95,45 +95,43 @@ export function ActiveSession({ session, elapsedTime, formattedTime, onEnd }: Ac
   }
 
   return (
-    <div className="space-y-10 animate-fade-in">
+    <div className="space-y-12 animate-fade-in">
       {/* Current task — pinned, editorial */}
-      <div className="writing-space rounded-xl p-6">
-        <div className="space-y-3">
-          <p className="text-xs text-text-muted uppercase tracking-wide">
-            Currently focused on
-          </p>
-          <h2 className="text-2xl font-medium text-foreground leading-relaxed">
-            {session.taskName}
-          </h2>
-          {session.context && (
-            <span className="inline-block mt-1 px-3 py-1 text-xs text-text-secondary bg-surface/50 rounded-lg border border-border/10">
-              {session.context}
-            </span>
-          )}
-        </div>
+      <div className="space-y-3 pt-4">
+        <p className="text-xs text-text-muted/70 uppercase tracking-widest">
+          Currently focused on
+        </p>
+        <h2 className="text-2xl font-light text-foreground leading-relaxed">
+          {session.taskName}
+        </h2>
+        {session.context && (
+          <span className="inline-block mt-2 px-3 py-1 text-xs text-text-muted bg-foreground/5 rounded-full">
+            {session.context}
+          </span>
+        )}
       </div>
 
       {/* Timer — centered, calm */}
-      <div className="flex justify-center py-6">
+      <div className="flex justify-center py-8">
         <FocusTimer elapsedSeconds={elapsedTime} formattedTime={formattedTime} />
       </div>
 
       {/* Actions */}
       <div className="space-y-3">
-        <DistractionButton hasActiveSession={true} />
+        <DistractionButton hasActiveSession={true} taskName={session.taskName} />
         
         <Button
-          variant="surface"
+          variant="ghost"
           onClick={handleEndClick}
-          className="w-full"
+          className="w-full text-text-muted hover:text-text-secondary border border-border/20 hover:border-border/40"
         >
-          <Square className="w-4 h-4 mr-2" />
+          <Square className="w-4 h-4 mr-2 opacity-70" />
           End session
         </Button>
       </div>
 
       {/* Ambient quote */}
-      <p className="text-sm text-text-muted text-center font-serif italic pt-4">
+      <p className="text-sm text-text-muted/40 text-center font-serif italic pt-8">
         The work will show you the way.
       </p>
     </div>

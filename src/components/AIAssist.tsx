@@ -1,26 +1,12 @@
 import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 interface AIAssistProps {
   onStartSession: (taskName: string) => void;
 }
-
-// Mock AI suggestions - in a real app, this would call an AI API
-const generateSuggestions = (intention: string): string[] => {
-  const suggestions = [
-    `Open the project and just look at it for 2 minutes`,
-    `Write down 3 things that need to happen before this is done`,
-    `Start with the smallest, most obvious next step`,
-    `Set a 20-minute timer and work on just one piece`,
-    `Define what "done" looks like for this session`,
-  ];
-  
-  // Shuffle and return 3-5 suggestions
-  return suggestions
-    .sort(() => Math.random() - 0.5)
-    .slice(0, 3 + Math.floor(Math.random() * 2));
-};
 
 export function AIAssist({ onStartSession }: AIAssistProps) {
   const [intention, setIntention] = useState('');
@@ -34,12 +20,29 @@ export function AIAssist({ onStartSession }: AIAssistProps) {
     setIsLoading(true);
     setHasAsked(true);
     
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    const newSuggestions = generateSuggestions(intention);
-    setSuggestions(newSuggestions);
-    setIsLoading(false);
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-assist', {
+        body: { type: 'suggest', intention: intention.trim() }
+      });
+
+      if (error) throw error;
+      
+      if (data?.suggestions && Array.isArray(data.suggestions)) {
+        setSuggestions(data.suggestions);
+      } else if (data?.error) {
+        throw new Error(data.error);
+      }
+    } catch (error) {
+      console.error('AI assist error:', error);
+      toast({
+        title: "Couldn't get suggestions",
+        description: error instanceof Error ? error.message : "Please try again.",
+        variant: "destructive"
+      });
+      setHasAsked(false);
+    } finally {
+      setIsLoading(false);
+    }
   }, [intention]);
 
   const handleSelectSuggestion = useCallback((suggestion: string) => {
@@ -53,67 +56,64 @@ export function AIAssist({ onStartSession }: AIAssistProps) {
   }, []);
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      {/* Header — editorial, not chatbot-y */}
-      <div className="space-y-2">
-        <h1 className="text-2xl font-medium text-foreground tracking-tight">
+    <div className="space-y-10 animate-fade-in">
+      {/* Header — editorial, not chatbot */}
+      <div className="space-y-2 pt-4">
+        <p className="text-lg text-text-secondary font-light tracking-tight">
           Not sure where to start?
-        </h1>
-        <p className="text-text-muted text-sm">
-          Tell me what you're trying to work on. I'll suggest some small steps.
+        </p>
+        <p className="text-sm text-text-muted/70">
+          Tell me what you want to work on.
         </p>
       </div>
 
       {!hasAsked ? (
         /* Input state */
-        <div className="space-y-6">
+        <div className="space-y-8">
           <textarea
             value={intention}
             onChange={(e) => setIntention(e.target.value)}
             placeholder="e.g., I want to work on my portfolio"
             rows={3}
-            className="w-full bg-card/60 backdrop-blur-sm border border-border/30 rounded-xl px-5 py-4 text-foreground placeholder:text-text-muted/60 focus:outline-none focus:border-primary/30 resize-none shadow-sm"
+            className="w-full bg-card/40 backdrop-blur-sm border border-border/20 rounded-xl px-6 py-5 text-foreground placeholder:text-text-muted/50 focus:outline-none focus:border-border/40 focus:bg-card/60 resize-none transition-all duration-300"
           />
           
           <Button
             onClick={handleAsk}
             disabled={!intention.trim()}
-            className="w-full"
+            size="lg"
+            className="w-full bg-primary/80 hover:bg-primary/90"
           >
             Break it down
-            <ArrowRight className="w-4 h-4 ml-1" />
+            <ArrowRight className="w-4 h-4 ml-1 opacity-70" />
           </Button>
         </div>
       ) : isLoading ? (
         /* Loading state */
-        <div className="text-center py-12">
+        <div className="text-center py-16">
           <Loader2 className="w-5 h-5 text-text-muted animate-spin mx-auto mb-4" />
-          <p className="text-sm text-text-muted">Thinking...</p>
+          <p className="text-sm text-text-muted/70">Thinking...</p>
         </div>
       ) : (
-        /* Results state — margin note feel */
-        <div className="space-y-6">
-          <div className="writing-space rounded-xl p-5">
-            <p className="text-xs text-text-muted uppercase tracking-wide mb-2">For</p>
-            <p className="text-foreground font-medium">"{intention}"</p>
+        /* Results — margin note feel */
+        <div className="space-y-8">
+          <div className="bg-card/30 backdrop-blur-sm rounded-xl p-5 border border-border/10">
+            <p className="text-xs text-text-muted/70 uppercase tracking-widest mb-2">For</p>
+            <p className="text-foreground">"{intention}"</p>
           </div>
 
-          <p className="text-sm text-text-secondary">
-            Here are some concrete next steps:
-          </p>
-
-          <div className="space-y-2">
+          <div className="space-y-3">
             {suggestions.map((suggestion, index) => (
               <button
                 key={index}
                 onClick={() => handleSelectSuggestion(suggestion)}
-                className="w-full text-left bg-card/50 backdrop-blur-sm border border-border/20 rounded-xl p-4 hover:border-primary/20 hover:bg-card transition-all duration-200 group"
+                className="w-full text-left bg-card/30 backdrop-blur-sm border border-border/10 rounded-xl p-5 hover:border-border/30 hover:bg-card/50 transition-all duration-200 group"
               >
                 <div className="flex items-center justify-between gap-4">
                   <span className="text-sm text-text-secondary group-hover:text-foreground transition-colors leading-relaxed">
                     {suggestion}
                   </span>
-                  <ArrowRight className="w-4 h-4 text-text-muted group-hover:text-primary transition-colors shrink-0 opacity-0 group-hover:opacity-100" />
+                  <ArrowRight className="w-4 h-4 text-text-muted group-hover:text-foreground transition-all shrink-0 opacity-0 group-hover:opacity-60" />
                 </div>
               </button>
             ))}
@@ -122,7 +122,7 @@ export function AIAssist({ onStartSession }: AIAssistProps) {
           <Button
             variant="ghost"
             onClick={handleReset}
-            className="w-full mt-4"
+            className="w-full text-text-muted hover:text-text-secondary"
           >
             Try something else
           </Button>
@@ -130,7 +130,7 @@ export function AIAssist({ onStartSession }: AIAssistProps) {
       )}
 
       {/* Ambient note */}
-      <p className="text-sm text-text-muted text-center font-serif italic pt-4">
+      <p className="text-sm text-text-muted/50 text-center font-serif italic pt-6">
         Small steps. That's the whole secret.
       </p>
     </div>
