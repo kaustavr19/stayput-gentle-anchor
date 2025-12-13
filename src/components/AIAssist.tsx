@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Sparkles, ArrowRight, Loader2 } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
 
 interface AIAssistProps {
   onStartSession: (taskName: string) => void;
@@ -10,7 +10,7 @@ interface AIAssistProps {
 const generateSuggestions = (intention: string): string[] => {
   const suggestions = [
     `Open the project and just look at it for 2 minutes`,
-    `Write down 3 things that need to happen before "${intention}" is done`,
+    `Write down 3 things that need to happen before this is done`,
     `Start with the smallest, most obvious next step`,
     `Set a 20-minute timer and work on just one piece`,
     `Define what "done" looks like for this session`,
@@ -53,55 +53,52 @@ export function AIAssist({ onStartSession }: AIAssistProps) {
   }, []);
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="text-center">
-        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-accent-soft mb-4">
-          <Sparkles className="w-5 h-5 text-accent-primary" />
-        </div>
-        <h2 className="text-lg font-medium text-foreground">What should I do next?</h2>
-        <p className="text-sm text-text-muted mt-1">
-          Tell me what you want to work on. I'll break it down.
+    <div className="space-y-8 animate-fade-in">
+      {/* Header — editorial, not chatbot-y */}
+      <div className="space-y-2">
+        <h1 className="text-2xl font-medium text-foreground tracking-tight">
+          Not sure where to start?
+        </h1>
+        <p className="text-text-muted text-sm">
+          Tell me what you're trying to work on. I'll suggest some small steps.
         </p>
       </div>
 
       {!hasAsked ? (
         /* Input state */
-        <div className="space-y-4">
-          <div>
-            <textarea
-              value={intention}
-              onChange={(e) => setIntention(e.target.value)}
-              placeholder="e.g., I want to work on my portfolio"
-              rows={3}
-              className="w-full bg-surface border border-border/20 rounded-lg px-4 py-3 text-foreground placeholder:text-text-muted focus:outline-none focus:border-primary/40 resize-none"
-            />
-          </div>
+        <div className="space-y-6">
+          <textarea
+            value={intention}
+            onChange={(e) => setIntention(e.target.value)}
+            placeholder="e.g., I want to work on my portfolio"
+            rows={3}
+            className="w-full bg-card/60 backdrop-blur-sm border border-border/30 rounded-xl px-5 py-4 text-foreground placeholder:text-text-muted/60 focus:outline-none focus:border-primary/30 resize-none shadow-sm"
+          />
           
           <Button
             onClick={handleAsk}
             disabled={!intention.trim()}
             className="w-full"
           >
-            <Sparkles className="w-4 h-4 mr-2" />
-            Get suggestions
+            Break it down
+            <ArrowRight className="w-4 h-4 ml-1" />
           </Button>
         </div>
       ) : isLoading ? (
         /* Loading state */
-        <div className="text-center py-8">
-          <Loader2 className="w-6 h-6 text-accent-primary animate-spin mx-auto mb-3" />
+        <div className="text-center py-12">
+          <Loader2 className="w-5 h-5 text-text-muted animate-spin mx-auto mb-4" />
           <p className="text-sm text-text-muted">Thinking...</p>
         </div>
       ) : (
-        /* Results state */
-        <div className="space-y-4">
-          <div className="bg-surface border border-border/20 rounded-lg p-4">
-            <p className="text-sm text-text-muted mb-1">For</p>
+        /* Results state — margin note feel */
+        <div className="space-y-6">
+          <div className="writing-space rounded-xl p-5">
+            <p className="text-xs text-text-muted uppercase tracking-wide mb-2">For</p>
             <p className="text-foreground font-medium">"{intention}"</p>
           </div>
 
-          <p className="text-sm text-text-muted">
+          <p className="text-sm text-text-secondary">
             Here are some concrete next steps:
           </p>
 
@@ -110,13 +107,13 @@ export function AIAssist({ onStartSession }: AIAssistProps) {
               <button
                 key={index}
                 onClick={() => handleSelectSuggestion(suggestion)}
-                className="w-full text-left bg-surface border border-border/20 rounded-lg p-4 hover:border-primary/30 hover:bg-accent-soft/30 transition-all group"
+                className="w-full text-left bg-card/50 backdrop-blur-sm border border-border/20 rounded-xl p-4 hover:border-primary/20 hover:bg-card transition-all duration-200 group"
               >
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm text-text-secondary group-hover:text-foreground transition-colors">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-sm text-text-secondary group-hover:text-foreground transition-colors leading-relaxed">
                     {suggestion}
                   </span>
-                  <ArrowRight className="w-4 h-4 text-text-muted group-hover:text-accent-primary transition-colors shrink-0" />
+                  <ArrowRight className="w-4 h-4 text-text-muted group-hover:text-primary transition-colors shrink-0 opacity-0 group-hover:opacity-100" />
                 </div>
               </button>
             ))}
@@ -125,16 +122,16 @@ export function AIAssist({ onStartSession }: AIAssistProps) {
           <Button
             variant="ghost"
             onClick={handleReset}
-            className="w-full mt-2"
+            className="w-full mt-4"
           >
-            Ask about something else
+            Try something else
           </Button>
         </div>
       )}
 
       {/* Ambient note */}
-      <p className="text-xs text-text-muted text-center font-serif italic">
-        "Small steps. That's the whole secret."
+      <p className="text-sm text-text-muted text-center font-serif italic pt-4">
+        Small steps. That's the whole secret.
       </p>
     </div>
   );
