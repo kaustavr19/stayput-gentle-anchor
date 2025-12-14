@@ -1,23 +1,39 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 
 interface StartSessionProps {
   onStart: (taskName: string, context?: string) => void;
+  continuationContext?: {
+    taskName: string;
+    context?: string;
+    wasPartial?: boolean;
+  } | null;
+  microRitual?: string | null;
 }
 
 const contextOptions = ['designing', 'writing', 'coding', 'thinking', 'planning', 'reading'];
 
-export function StartSession({ onStart }: StartSessionProps) {
+export function StartSession({ onStart, continuationContext, microRitual }: StartSessionProps) {
   const [taskName, setTaskName] = useState('');
   const [context, setContext] = useState<string | undefined>();
   const [isFocused, setIsFocused] = useState(false);
+  const [showContinuation, setShowContinuation] = useState(true);
+
+  // Pre-fill from last session if available
+  useEffect(() => {
+    if (continuationContext && showContinuation) {
+      setTaskName(continuationContext.taskName);
+      setContext(continuationContext.context);
+    }
+  }, [continuationContext, showContinuation]);
 
   const handleStart = useCallback(() => {
     if (!taskName.trim()) return;
     onStart(taskName.trim(), context);
     setTaskName('');
     setContext(undefined);
+    setShowContinuation(false);
   }, [taskName, context, onStart]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
@@ -26,8 +42,23 @@ export function StartSession({ onStart }: StartSessionProps) {
     }
   }, [handleStart, taskName]);
 
+  const handleDismissContinuation = useCallback(() => {
+    setShowContinuation(false);
+    setTaskName('');
+    setContext(undefined);
+  }, []);
+
+  const hasContinuation = continuationContext && showContinuation;
+
   return (
     <div className="space-y-10 animate-fade-in">
+      {/* Micro-ritual — shown occasionally */}
+      {microRitual && (
+        <p className="text-sm text-text-muted font-serif italic text-center animate-fade-in">
+          {microRitual}
+        </p>
+      )}
+
       {/* Screen title — quiet question, not headline */}
       <div className="space-y-2 pt-4">
         <p className="text-lg text-text-secondary font-light tracking-tight">
@@ -56,6 +87,21 @@ export function StartSession({ onStart }: StartSessionProps) {
               ${isFocused ? 'shadow-sm' : ''}
             `}
           />
+          
+          {/* Continuation nudge — subtle, dismissible */}
+          {hasContinuation && (
+            <div className="mt-3 flex items-center justify-between">
+              <p className="text-xs text-text-muted">
+                Last time, you were here.
+              </p>
+              <button
+                onClick={handleDismissContinuation}
+                className="text-xs text-text-muted/60 hover:text-text-muted transition-colors"
+              >
+                Start fresh
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Context tags — soft, tactile, optional */}
