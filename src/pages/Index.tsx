@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Layout } from '@/components/Layout';
 import { StartSession } from '@/components/StartSession';
 import { ActiveSession } from '@/components/ActiveSession';
-import { Notepad } from '@/components/Notepad';
+import { NotepadTwoColumn } from '@/components/NotepadTwoColumn';
 import { SessionHistory } from '@/components/SessionHistory';
 import { AIAssist } from '@/components/AIAssist';
 import { useFocusSession } from '@/hooks/useFocusSession';
@@ -20,8 +20,12 @@ const Index = () => {
     elapsedTime, 
     formattedTime,
     startSession, 
+    pauseSession,
+    resumeSession,
+    logDistraction,
     endSession, 
-    hasActiveSession 
+    hasActiveSession,
+    isPaused 
   } = useFocusSession();
   const { notes, addNote, deleteNote, toggleParked, getParkedNotes } = useNotes();
   
@@ -96,6 +100,11 @@ const Index = () => {
     setDismissedParkedSuggestion(true);
   }, []);
 
+  // Handle adding note with session link
+  const handleAddNote = useCallback((content: string) => {
+    addNote(content, activeSession?.id);
+  }, [addNote, activeSession]);
+
   const renderContent = () => {
     switch (activeTab) {
       case 'focus':
@@ -105,7 +114,11 @@ const Index = () => {
               session={activeSession}
               elapsedTime={elapsedTime}
               formattedTime={formattedTime}
+              isPaused={isPaused}
               onEnd={handleEndSession}
+              onPause={pauseSession}
+              onResume={resumeSession}
+              onDistraction={logDistraction}
               tinyWinMessage={tinyWinMessage}
             />
           );
@@ -120,9 +133,9 @@ const Index = () => {
       
       case 'notes':
         return (
-          <Notepad
+          <NotepadTwoColumn
             notes={notes}
-            onAdd={addNote}
+            onAdd={handleAddNote}
             onDelete={deleteNote}
             onToggleParked={toggleParked}
             parkedSuggestion={parkedSuggestion}
@@ -131,7 +144,7 @@ const Index = () => {
         );
       
       case 'history':
-        return <SessionHistory sessions={sessions} />;
+        return <SessionHistory sessions={sessions} notes={notes} />;
       
       case 'ai':
         return (
@@ -148,9 +161,9 @@ const Index = () => {
 
   // Show notepad in sidebar when on focus tab
   const sideContent = activeTab === 'focus' ? (
-    <Notepad
+    <NotepadTwoColumn
       notes={notes}
-      onAdd={addNote}
+      onAdd={handleAddNote}
       onDelete={deleteNote}
       onToggleParked={toggleParked}
     />

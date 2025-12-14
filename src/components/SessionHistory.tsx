@@ -1,12 +1,17 @@
+import { useState } from 'react';
 import { FocusSession } from '@/types';
-import { format, formatDistanceToNow } from 'date-fns';
-import { Check, Minus, X, Clock, Pause } from 'lucide-react';
+import { format } from 'date-fns';
+import { Check, Minus, X, Clock, Pause, ChevronRight } from 'lucide-react';
+import { TaskActivityView } from './TaskActivityView';
 
 interface SessionHistoryProps {
   sessions: FocusSession[];
+  notes: { id: string; content: string; isParked?: boolean; createdAt: Date; linkedSessionId?: string }[];
 }
 
-export function SessionHistory({ sessions }: SessionHistoryProps) {
+export function SessionHistory({ sessions, notes }: SessionHistoryProps) {
+  const [selectedSession, setSelectedSession] = useState<FocusSession | null>(null);
+
   const completedSessions = sessions
     .filter(s => s.endedAt)
     .sort((a, b) => new Date(b.endedAt!).getTime() - new Date(a.endedAt!).getTime())
@@ -44,7 +49,8 @@ export function SessionHistory({ sessions }: SessionHistoryProps) {
     if (!session.endedAt) return null;
     const start = new Date(session.startedAt).getTime();
     const end = new Date(session.endedAt).getTime();
-    const mins = Math.round((end - start) / 60000);
+    const pausedTime = (session.totalPausedTime || 0) * 1000;
+    const mins = Math.round((end - start - pausedTime) / 60000);
     if (mins < 60) return `${mins}m`;
     const hrs = Math.floor(mins / 60);
     const remainingMins = mins % 60;
@@ -60,6 +66,22 @@ export function SessionHistory({ sessions }: SessionHistoryProps) {
     }
     groupedSessions[date].push(session);
   });
+
+  // Get linked notes for selected session
+  const getLinkedNotes = (sessionId: string) => {
+    return notes.filter(n => n.linkedSessionId === sessionId);
+  };
+
+  // Task Activity View
+  if (selectedSession) {
+    return (
+      <TaskActivityView
+        session={selectedSession}
+        linkedNotes={getLinkedNotes(selectedSession.id)}
+        onBack={() => setSelectedSession(null)}
+      />
+    );
+  }
 
   if (completedSessions.length === 0) {
     return (
@@ -88,7 +110,6 @@ export function SessionHistory({ sessions }: SessionHistoryProps) {
         </p>
       </div>
 
-      {/* Session list — work log, not report card */}
       <div className="space-y-8">
         {Object.entries(groupedSessions).map(([date, daySessions]) => (
           <div key={date} className="space-y-3">
@@ -98,9 +119,10 @@ export function SessionHistory({ sessions }: SessionHistoryProps) {
             
             <div className="space-y-2">
               {daySessions.map((session) => (
-                <div
+                <button
                   key={session.id}
-                  className="group flex items-center gap-4 p-4 rounded-lg bg-card/30 hover:bg-card/50 transition-colors"
+                  onClick={() => setSelectedSession(session)}
+                  className="group w-full flex items-center gap-4 p-4 rounded-lg bg-card/30 hover:bg-card/50 transition-colors text-left"
                 >
                   {/* Status icon */}
                   <div className="shrink-0">
@@ -132,15 +154,18 @@ export function SessionHistory({ sessions }: SessionHistoryProps) {
                   </div>
                   
                   {/* Time info */}
-                  <div className="text-right shrink-0">
-                    <p className="text-sm text-text-secondary tabular-nums">
-                      {getDuration(session)}
-                    </p>
-                    <p className="text-xs text-text-muted/70 mt-0.5">
-                      {format(new Date(session.endedAt!), 'h:mm a')}
-                    </p>
+                  <div className="text-right shrink-0 flex items-center gap-3">
+                    <div>
+                      <p className="text-sm text-text-secondary tabular-nums">
+                        {getDuration(session)}
+                      </p>
+                      <p className="text-xs text-text-muted/70 mt-0.5">
+                        {format(new Date(session.endedAt!), 'h:mm a')}
+                      </p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-text-muted/40 group-hover:text-text-muted transition-colors" />
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </div>

@@ -1,15 +1,20 @@
 import { useState, useCallback } from 'react';
-import { FocusSession } from '@/types';
+import { FocusSession, PauseReason, DistractionCause } from '@/types';
 import { FocusTimer } from './FocusTimer';
-import { DistractionButton } from './DistractionButton';
+import { PauseReasonPrompt } from './PauseReasonPrompt';
+import { DistractionPrompt } from './DistractionPrompt';
 import { Button } from '@/components/ui/button';
-import { Square, Check, Minus, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Square, Check, Minus, X, ChevronDown, ChevronUp, Pause, Play } from 'lucide-react';
 
 interface ActiveSessionProps {
   session: FocusSession;
   elapsedTime: number;
   formattedTime: string;
+  isPaused: boolean;
   onEnd: (reflection?: FocusSession['reflection']) => void;
+  onPause: (reason?: PauseReason, customReason?: string) => void;
+  onResume: () => void;
+  onDistraction: (cause?: DistractionCause, customCause?: string, aiTip?: string) => void;
   tinyWinMessage?: string | null;
 }
 
@@ -19,8 +24,12 @@ type StopReason = 'finished' | 'distracted' | 'energy' | 'time' | 'skipped';
 export function ActiveSession({ 
   session, 
   elapsedTime, 
-  formattedTime, 
+  formattedTime,
+  isPaused,
   onEnd,
+  onPause,
+  onResume,
+  onDistraction,
   tinyWinMessage 
 }: ActiveSessionProps) {
   const [showReflection, setShowReflection] = useState(false);
@@ -29,10 +38,42 @@ export function ActiveSession({
   const [note, setNote] = useState('');
   const [showNote, setShowNote] = useState(false);
   const [showTinyWin, setShowTinyWin] = useState(false);
+  
+  // Pause & Distraction prompts
+  const [showPausePrompt, setShowPausePrompt] = useState(false);
+  const [showDistractionPrompt, setShowDistractionPrompt] = useState(false);
 
   const handleEndClick = useCallback(() => {
     setShowReflection(true);
   }, []);
+
+  const handlePauseClick = useCallback(() => {
+    setShowPausePrompt(true);
+  }, []);
+
+  const handlePauseSubmit = useCallback((reason: PauseReason, customReason?: string) => {
+    setShowPausePrompt(false);
+    onPause(reason, customReason);
+  }, [onPause]);
+
+  const handlePauseSkip = useCallback(() => {
+    setShowPausePrompt(false);
+    onPause('skip');
+  }, [onPause]);
+
+  const handleDistractionClick = useCallback(() => {
+    setShowDistractionPrompt(true);
+  }, []);
+
+  const handleDistractionSubmit = useCallback((cause: DistractionCause, customCause?: string, aiTip?: string) => {
+    setShowDistractionPrompt(false);
+    onDistraction(cause, customCause, aiTip);
+  }, [onDistraction]);
+
+  const handleDistractionSkip = useCallback(() => {
+    setShowDistractionPrompt(false);
+    onDistraction('skip');
+  }, [onDistraction]);
 
   const handleFinish = useCallback(() => {
     const reflection: FocusSession['reflection'] = completed 
@@ -43,7 +84,6 @@ export function ActiveSession({
         } 
       : undefined;
 
-    // Show tiny win briefly before completing
     if (tinyWinMessage && completed === 'yes') {
       setShowTinyWin(true);
       setTimeout(() => {
@@ -72,14 +112,12 @@ export function ActiveSession({
   if (showReflection) {
     return (
       <div className="space-y-10 animate-fade-in">
-        {/* Session summary */}
         <div className="space-y-3 pt-4">
           <p className="text-xs text-text-muted/70 uppercase tracking-widest">You focused on</p>
           <p className="text-xl text-foreground font-light leading-relaxed">{session.taskName}</p>
           <p className="text-sm text-text-muted">for {formattedTime}</p>
         </div>
 
-        {/* Reflection question */}
         <div className="space-y-4">
           <p className="text-sm text-text-secondary">Did you finish?</p>
           <div className="flex gap-3">
@@ -107,7 +145,6 @@ export function ActiveSession({
           </div>
         </div>
 
-        {/* Stop reason question — V1.1 addition */}
         {completed && (
           <div className="space-y-4 animate-fade-in">
             <p className="text-sm text-text-secondary">What made you stop?</p>
@@ -148,7 +185,6 @@ export function ActiveSession({
           </div>
         )}
 
-        {/* Optional note */}
         {completed && (
           <div className="space-y-3 animate-fade-in">
             <button
@@ -171,7 +207,6 @@ export function ActiveSession({
           </div>
         )}
 
-        {/* Actions */}
         <div className="flex gap-3 pt-4">
           <Button variant="ghost" onClick={handleSkip} className="flex-1 text-text-muted">
             Skip all
@@ -189,7 +224,7 @@ export function ActiveSession({
       {/* Current task — pinned, editorial */}
       <div className="space-y-3 pt-4">
         <p className="text-xs text-text-muted/70 uppercase tracking-widest">
-          Currently focused on
+          {isPaused ? 'Paused' : 'Currently focused on'}
         </p>
         <h2 className="text-2xl font-light text-foreground leading-relaxed">
           {session.taskName}
@@ -203,22 +238,69 @@ export function ActiveSession({
 
       {/* Timer — centered, calm */}
       <div className="flex justify-center py-8">
-        <FocusTimer elapsedSeconds={elapsedTime} formattedTime={formattedTime} />
+        <FocusTimer elapsedSeconds={elapsedTime} formattedTime={formattedTime} isPaused={isPaused} />
       </div>
 
+      {/* Pause/Distraction prompts */}
+      {showPausePrompt && (
+        <PauseReasonPrompt 
+          onSubmit={handlePauseSubmit}
+          onSkip={handlePauseSkip}
+        />
+      )}
+
+      {showDistractionPrompt && (
+        <DistractionPrompt
+          taskName={session.taskName}
+          onSubmit={handleDistractionSubmit}
+          onSkip={handleDistractionSkip}
+        />
+      )}
+
       {/* Actions */}
-      <div className="space-y-3">
-        <DistractionButton hasActiveSession={true} taskName={session.taskName} />
-        
-        <Button
-          variant="ghost"
-          onClick={handleEndClick}
-          className="w-full text-text-muted hover:text-text-secondary border border-border/20 hover:border-border/40"
-        >
-          <Square className="w-4 h-4 mr-2 opacity-70" />
-          End session
-        </Button>
-      </div>
+      {!showPausePrompt && !showDistractionPrompt && (
+        <div className="space-y-3">
+          {/* Distracted button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleDistractionClick}
+            className="w-full text-text-muted/60 hover:text-text-muted border border-dashed border-text-muted/20 hover:border-text-muted/40"
+          >
+            Distracted?
+          </Button>
+
+          {/* Pause / Resume button */}
+          {isPaused ? (
+            <Button
+              variant="ghost"
+              onClick={onResume}
+              className="w-full text-primary border border-primary/20 hover:bg-primary/10"
+            >
+              <Play className="w-4 h-4 mr-2" />
+              Resume
+            </Button>
+          ) : (
+            <Button
+              variant="ghost"
+              onClick={handlePauseClick}
+              className="w-full text-text-muted hover:text-text-secondary border border-border/20 hover:border-border/40"
+            >
+              <Pause className="w-4 h-4 mr-2 opacity-70" />
+              Pause
+            </Button>
+          )}
+          
+          <Button
+            variant="ghost"
+            onClick={handleEndClick}
+            className="w-full text-text-muted hover:text-text-secondary border border-border/20 hover:border-border/40"
+          >
+            <Square className="w-4 h-4 mr-2 opacity-70" />
+            End session
+          </Button>
+        </div>
+      )}
 
       {/* Ambient quote */}
       <p className="text-sm text-text-muted/40 text-center font-serif italic pt-8">
