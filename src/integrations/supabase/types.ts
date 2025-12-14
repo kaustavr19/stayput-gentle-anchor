@@ -14,7 +14,116 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      notes: {
+        Row: {
+          content: string
+          created_at: string
+          details: string | null
+          id: string
+          is_parked: boolean | null
+          linked_session_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          is_parked?: boolean | null
+          linked_session_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          details?: string | null
+          id?: string
+          is_parked?: boolean | null
+          linked_session_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_linked_session_fkey"
+            columns: ["linked_session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sessions: {
+        Row: {
+          activities: Json | null
+          context: string | null
+          created_at: string
+          ended_at: string | null
+          id: string
+          is_paused: boolean | null
+          paused_at: string | null
+          reflection: Json | null
+          started_at: string
+          task_name: string
+          total_paused_time: number | null
+          user_id: string
+        }
+        Insert: {
+          activities?: Json | null
+          context?: string | null
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          is_paused?: boolean | null
+          paused_at?: string | null
+          reflection?: Json | null
+          started_at?: string
+          task_name: string
+          total_paused_time?: number | null
+          user_id: string
+        }
+        Update: {
+          activities?: Json | null
+          context?: string | null
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          is_paused?: boolean | null
+          paused_at?: string | null
+          reflection?: Json | null
+          started_at?: string
+          task_name?: string
+          total_paused_time?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

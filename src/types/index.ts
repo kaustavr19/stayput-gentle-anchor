@@ -27,6 +27,7 @@ export interface FocusSession {
 export interface Note {
   id: string;
   content: string;
+  details?: string;
   createdAt: Date;
   isParked?: boolean;
   linkedSessionId?: string;
