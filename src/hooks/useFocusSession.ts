@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { FocusSession } from '@/types';
+import { FocusSession, ActivityEvent, PauseReason, DistractionCause } from '@/types';
 import { useLocalStorage } from './useLocalStorage';
 
 export function useFocusSession() {
@@ -15,17 +15,23 @@ export function useFocusSession() {
     }
   }, []);
 
-  // Timer effect
+  // Timer effect (accounts for paused time)
   useEffect(() => {
     if (!activeSession) {
       setElapsedTime(0);
       return;
     }
 
+    if (activeSession.isPaused) {
+      // Don't update time while paused
+      return;
+    }
+
     const updateElapsed = () => {
       const start = new Date(activeSession.startedAt).getTime();
       const now = Date.now();
-      setElapsedTime(Math.floor((now - start) / 1000));
+      const pausedTime = (activeSession.totalPausedTime || 0) * 1000;
+      setElapsedTime(Math.floor((now - start - pausedTime) / 1000));
     };
 
     updateElapsed();
@@ -33,12 +39,30 @@ export function useFocusSession() {
     return () => clearInterval(interval);
   }, [activeSession]);
 
+  const addActivity = useCallback((session: FocusSession, event: Omit<ActivityEvent, 'id'>) => {
+    const newEvent: ActivityEvent = {
+      ...event,
+      id: crypto.randomUUID(),
+    };
+    return {
+      ...session,
+      activities: [...(session.activities || []), newEvent],
+    };
+  }, []);
+
   const startSession = useCallback((taskName: string, context?: string) => {
     const newSession: FocusSession = {
       id: crypto.randomUUID(),
       taskName,
       context,
       startedAt: new Date(),
+      activities: [
+        {
+          id: crypto.randomUUID(),
+          type: 'session_started',
+          timestamp: new Date(),
+        }
+      ],
     };
     
     setSessions(prev => [...prev, newSession]);
@@ -46,21 +70,92 @@ export function useFocusSession() {
     return newSession;
   }, [setSessions]);
 
+  const pauseSession = useCallback((reason?: PauseReason, customReason?: string) => {
+    if (!activeSession) return;
+
+    const pausedSession = addActivity(activeSession, {
+      type: 'session_paused',
+      timestamp: new Date(),
+      reason: customReason || reason,
+    });
+
+    const updated: FocusSession = {
+      ...pausedSession,
+      isPaused: true,
+      pausedAt: new Date(),
+    };
+
+    setSessions(prev => 
+      prev.map(s => s.id === activeSession.id ? updated : s)
+    );
+    setActiveSession(updated);
+    return updated;
+  }, [activeSession, setSessions, addActivity]);
+
+  const resumeSession = useCallback(() => {
+    if (!activeSession || !activeSession.isPaused) return;
+
+    const pausedAt = activeSession.pausedAt ? new Date(activeSession.pausedAt).getTime() : Date.now();
+    const pauseDuration = Math.floor((Date.now() - pausedAt) / 1000);
+
+    const resumedSession = addActivity(activeSession, {
+      type: 'session_resumed',
+      timestamp: new Date(),
+    });
+
+    const updated: FocusSession = {
+      ...resumedSession,
+      isPaused: false,
+      pausedAt: undefined,
+      totalPausedTime: (activeSession.totalPausedTime || 0) + pauseDuration,
+    };
+
+    setSessions(prev => 
+      prev.map(s => s.id === activeSession.id ? updated : s)
+    );
+    setActiveSession(updated);
+    return updated;
+  }, [activeSession, setSessions, addActivity]);
+
+  const logDistraction = useCallback((cause?: DistractionCause, customCause?: string, aiTip?: string) => {
+    if (!activeSession) return;
+
+    const updatedSession = addActivity(activeSession, {
+      type: 'distraction',
+      timestamp: new Date(),
+      reason: customCause || cause,
+      aiTip,
+    });
+
+    setSessions(prev => 
+      prev.map(s => s.id === activeSession.id ? updatedSession : s)
+    );
+    setActiveSession(updatedSession);
+    return updatedSession;
+  }, [activeSession, setSessions, addActivity]);
+
   const endSession = useCallback((reflection?: FocusSession['reflection']) => {
     if (!activeSession) return;
 
-    const endedSession: FocusSession = {
-      ...activeSession,
+    const endedSession = addActivity(activeSession, {
+      type: 'session_ended',
+      timestamp: new Date(),
+      reason: reflection?.stopReason,
+    });
+
+    const updated: FocusSession = {
+      ...endedSession,
       endedAt: new Date(),
+      isPaused: false,
       reflection,
     };
 
     setSessions(prev => 
-      prev.map(s => s.id === activeSession.id ? endedSession : s)
+      prev.map(s => s.id === activeSession.id ? updated : s)
     );
     setActiveSession(null);
-    return endedSession;
-  }, [activeSession, setSessions]);
+    return updated;
+  }, [activeSession, setSessions, addActivity]);
 
   const formatTime = useCallback((seconds: number) => {
     const hrs = Math.floor(seconds / 3600);
@@ -82,7 +177,11 @@ export function useFocusSession() {
     elapsedTime,
     formattedTime: formatTime(elapsedTime),
     startSession,
+    pauseSession,
+    resumeSession,
+    logDistraction,
     endSession,
     hasActiveSession: !!activeSession,
+    isPaused: activeSession?.isPaused || false,
   };
 }

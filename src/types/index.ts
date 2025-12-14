@@ -1,9 +1,22 @@
+export interface ActivityEvent {
+  id: string;
+  type: 'session_started' | 'session_paused' | 'session_resumed' | 'session_ended' | 'distraction' | 'note_added';
+  timestamp: Date;
+  reason?: string;
+  aiTip?: string;
+  noteContent?: string;
+}
+
 export interface FocusSession {
   id: string;
   taskName: string;
   context?: string;
   startedAt: Date;
   endedAt?: Date;
+  isPaused?: boolean;
+  pausedAt?: Date;
+  totalPausedTime?: number; // in seconds
+  activities?: ActivityEvent[];
   reflection?: {
     completed: 'yes' | 'partially' | 'no';
     note?: string;
@@ -32,3 +45,6 @@ export interface AppState {
   sessionsToday: number;
   hasSeenWelcomeBack?: boolean;
 }
+
+export type PauseReason = 'break' | 'distracted' | 'switching' | 'energy' | 'other' | 'skip';
+export type DistractionCause = 'youtube' | 'context_switching' | 'notification' | 'overthinking' | 'fatigue' | 'other' | 'skip';

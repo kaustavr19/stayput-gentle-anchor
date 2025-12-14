@@ -40,7 +40,7 @@ Return EXACTLY 3-5 steps that:
 Format: Return a JSON array of strings, each being one step.
 Example: ["Open the project and look at it for 2 minutes", "Write down what feels unfinished", "Pick the smallest piece and start there"]`;
 
-const REFRAME_PROMPT = `The user got distracted during focused work and clicked a "I'm drifting" button.
+const REFRAME_PROMPT = `The user got distracted during focused work.
 
 Return EXACTLY ONE short sentence that:
 - Acknowledges distraction without judgment
@@ -53,13 +53,24 @@ Return EXACTLY ONE short sentence that:
 Good examples:
 - "You didn't quit. You paused."
 - "The work is still here."
-- "Two minutes counts."
-- "Your brain needed a break. Now it's had one."
+- "Two minutes counts."`;
 
-Bad examples:
-- "Get back to work!" (aggressive)
-- "You've got this!" (motivational)
-- "Focus is key to success" (preachy)`;
+const DISTRACTION_TIP_PROMPT = `The user got distracted and told you the cause. Give a brief, practical micro-tip.
+
+Rules:
+- Max 2 sentences
+- No exclamation marks
+- No "you should" language
+- Sound like a quiet aside, not advice
+- Be specific to the cause they mentioned
+
+Examples by cause:
+- YouTube/social: "Maybe keep one tab open. Close the rest."
+- Overthinking: "Write the rough version first."
+- Fatigue: "A short break counts. Pick a return point."
+- Notification: "The message can wait."
+- Context switching: "Finish this thought first."`;
+
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -67,7 +78,7 @@ serve(async (req) => {
   }
 
   try {
-    const { type, intention, taskName, recentSessions, recentStopReasons } = await req.json();
+    const { type, intention, taskName, cause, recentSessions, recentStopReasons } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
@@ -95,11 +106,13 @@ Break this down into 3-5 small, concrete next steps.`;
       userPrompt = taskName 
         ? `The user was working on "${taskName}" and got distracted.`
         : "The user got distracted during focused work.";
+    } else if (type === "distraction_tip") {
+      userPrompt = `The user got distracted by: "${cause || 'something'}". They were working on: "${taskName || 'a task'}". Give a brief micro-tip.`;
     } else {
       throw new Error("Invalid request type");
     }
 
-    console.log("AI assist request:", { type, intention, taskName, hasContext: !!recentSessions });
+    console.log("AI assist request:", { type, intention, taskName, cause, hasContext: !!recentSessions });
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -110,7 +123,7 @@ Break this down into 3-5 small, concrete next steps.`;
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: SYSTEM_PROMPT + "\n\n" + (type === "suggest" ? SUGGESTION_PROMPT : REFRAME_PROMPT) },
+          { role: "system", content: SYSTEM_PROMPT + "\n\n" + (type === "suggest" ? SUGGESTION_PROMPT : type === "distraction_tip" ? DISTRACTION_TIP_PROMPT : REFRAME_PROMPT) },
           { role: "user", content: userPrompt },
         ],
       }),
