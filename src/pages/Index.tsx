@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Layout } from '@/components/Layout';
 import { StartSession } from '@/components/StartSession';
 import { ActiveSession } from '@/components/ActiveSession';
+import { NotesLanes } from '@/components/NotesLanes';
 import { NotepadTwoColumn } from '@/components/NotepadTwoColumn';
 import { SessionHistory } from '@/components/SessionHistory';
 import { AIAssist } from '@/components/AIAssist';
@@ -27,7 +28,7 @@ const Index = () => {
     hasActiveSession,
     isPaused 
   } = useFocusSession();
-  const { notes, addNote, deleteNote, toggleParked, getParkedNotes } = useNotes();
+  const { notes, addNote, deleteNote, updateNote, toggleParked, getParkedNotes } = useNotes();
   
   // V1.1: App state for continuity features
   const {
@@ -133,10 +134,12 @@ const Index = () => {
       
       case 'notes':
         return (
-          <NotepadTwoColumn
+          <NotesLanes
             notes={notes}
+            sessions={sessions}
             onAdd={handleAddNote}
             onDelete={deleteNote}
+            onUpdate={updateNote}
             onToggleParked={toggleParked}
             parkedSuggestion={parkedSuggestion}
             onDismissParkedSuggestion={handleDismissParkedSuggestion}

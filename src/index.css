@@ -2,14 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;1,400&display=swap');
-
 @layer base {
   :root {
-    /* StayPut Design System — Light Mode (Paper, not white) */
-    --bg-primary: 220 14% 96%;
-    --bg-secondary: 0 0% 100%;
-    --surface: 220 20% 94%;
+    /* StayPut Design System — Light Mode (Morning paper) */
+    --bg-primary: 40 20% 97%;
+    --bg-secondary: 40 30% 99%;
+    --surface: 40 25% 95%;
     
     --text-primary: 220 25% 12%;
     --text-secondary: 220 15% 35%;
@@ -19,6 +17,12 @@
     --accent-soft: 214 80% 45%;
     
     --border-subtle: 0 0% 0%;
+    
+    /* Pastel accents */
+    --pastel-blue: 214 60% 94%;
+    --pastel-lavender: 270 40% 95%;
+    --pastel-sand: 35 50% 95%;
+    --pastel-mint: 160 40% 94%;
     
     /* Semantic mappings */
     --background: var(--bg-primary);
@@ -52,17 +56,17 @@
     --radius: 12px;
     
     /* Typography */
-    --font-sans: 'Inter', system-ui, sans-serif;
-    --font-serif: 'Lora', Georgia, serif;
+    --font-sans: 'DM Sans', system-ui, sans-serif;
+    --font-serif: 'IBM Plex Serif', Georgia, serif;
     
     /* Transitions */
     --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
     --transition-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
     
     /* Shadows — softer for light mode */
-    --shadow-soft: 0 2px 16px -4px rgba(0, 0, 0, 0.08);
-    --shadow-glow: 0 0 32px -8px hsl(var(--accent-primary) / 0.15);
-    --shadow-surface: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
+    --shadow-soft: 0 2px 16px -4px rgba(0, 0, 0, 0.06);
+    --shadow-glow: 0 0 32px -8px hsl(var(--accent-primary) / 0.12);
+    --shadow-surface: 0 1px 3px rgba(0, 0, 0, 0.03), 0 4px 12px rgba(0, 0, 0, 0.02);
   }
 
   .dark {
@@ -79,6 +83,12 @@
     --accent-soft: 214 90% 58%;
     
     --border-subtle: 0 0% 100%;
+    
+    /* Pastel accents (muted for dark mode) */
+    --pastel-blue: 214 30% 18%;
+    --pastel-lavender: 270 20% 18%;
+    --pastel-sand: 35 25% 16%;
+    --pastel-mint: 160 20% 16%;
     
     /* Semantic mappings */
     --background: var(--bg-primary);
@@ -130,6 +140,7 @@
   }
   
   h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
     @apply font-medium tracking-tight;
     letter-spacing: -0.02em;
   }
@@ -158,6 +169,10 @@
 @layer utilities {
   .font-serif {
     font-family: var(--font-serif);
+  }
+  
+  .font-sans {
+    font-family: var(--font-sans);
   }
   
   .text-balance {
@@ -193,6 +208,23 @@
   .writing-space {
     @apply bg-card/50 backdrop-blur-sm;
     box-shadow: var(--shadow-surface);
+  }
+  
+  /* Note card pastels */
+  .note-pastel-blue {
+    background: hsl(var(--pastel-blue));
+  }
+  
+  .note-pastel-lavender {
+    background: hsl(var(--pastel-lavender));
+  }
+  
+  .note-pastel-sand {
+    background: hsl(var(--pastel-sand));
+  }
+  
+  .note-pastel-mint {
+    background: hsl(var(--pastel-mint));
   }
 }
 

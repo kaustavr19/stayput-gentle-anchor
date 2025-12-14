@@ -78,7 +78,7 @@ serve(async (req) => {
   }
 
   try {
-    const { type, intention, taskName, cause, recentSessions, recentStopReasons } = await req.json();
+    const { type, intention, taskName, cause, context, pauseReasons, distractionCauses, recentSessions, recentStopReasons } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
@@ -108,6 +108,10 @@ Break this down into 3-5 small, concrete next steps.`;
         : "The user got distracted during focused work.";
     } else if (type === "distraction_tip") {
       userPrompt = `The user got distracted by: "${cause || 'something'}". They were working on: "${taskName || 'a task'}". Give a brief micro-tip.`;
+    } else if (type === "anecdote") {
+      const pauses = pauseReasons?.length ? `Paused for: ${pauseReasons.join(", ")}` : "";
+      const distractions = distractionCauses?.length ? `Distracted by: ${distractionCauses.join(", ")}` : "";
+      userPrompt = `Task: "${taskName || 'a task'}"${context ? ` (${context})` : ""}. ${pauses} ${distractions}. Provide a brief reflective observation.`;
     } else {
       throw new Error("Invalid request type");
     }
@@ -123,7 +127,7 @@ Break this down into 3-5 small, concrete next steps.`;
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: SYSTEM_PROMPT + "\n\n" + (type === "suggest" ? SUGGESTION_PROMPT : type === "distraction_tip" ? DISTRACTION_TIP_PROMPT : REFRAME_PROMPT) },
+          { role: "system", content: SYSTEM_PROMPT + "\n\n" + (type === "suggest" ? SUGGESTION_PROMPT : type === "distraction_tip" ? DISTRACTION_TIP_PROMPT : type === "anecdote" ? ANECDOTE_PROMPT : REFRAME_PROMPT) },
           { role: "user", content: userPrompt },
         ],
       }),
@@ -166,8 +170,11 @@ Break this down into 3-5 small, concrete next steps.`;
       return new Response(JSON.stringify({ suggestions }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    } else if (type === "anecdote") {
+      return new Response(JSON.stringify({ anecdote: content.trim() }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     } else {
-      // For reframe, return the text directly
       return new Response(JSON.stringify({ text: content.trim() }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

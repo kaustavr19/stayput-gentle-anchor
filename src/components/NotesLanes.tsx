@@ -1,0 +1,256 @@
+import { useState, useCallback, useMemo } from 'react';
+import { Note, FocusSession } from '@/types';
+import { Button } from '@/components/ui/button';
+import { Plus, Trash2, ArrowRight, ArrowLeft } from 'lucide-react';
+import { format } from 'date-fns';
+import { NoteDetail } from './NoteDetail';
+
+interface NotesLanesProps {
+  notes: Note[];
+  sessions: FocusSession[];
+  onAdd: (content: string) => void;
+  onDelete: (id: string) => void;
+  onUpdate: (id: string, content: string, details?: string) => void;
+  onToggleParked?: (id: string) => void;
+  onViewSession?: (sessionId: string) => void;
+  parkedSuggestion?: string | null;
+  onDismissParkedSuggestion?: () => void;
+}
+
+const pastelColors = [
+  'bg-pastel-blue',
+  'bg-pastel-lavender', 
+  'bg-pastel-sand',
+  'bg-pastel-mint',
+];
+
+function getPastelColor(index: number) {
+  return pastelColors[index % pastelColors.length];
+}
+
+export function NotesLanes({ 
+  notes, 
+  sessions,
+  onAdd, 
+  onDelete, 
+  onUpdate,
+  onToggleParked,
+  onViewSession,
+  parkedSuggestion,
+  onDismissParkedSuggestion 
+}: NotesLanesProps) {
+  const [newNote, setNewNote] = useState('');
+  const [isAdding, setIsAdding] = useState(false);
+  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+
+  const activeNotes = useMemo(() => notes.filter(n => !n.isParked), [notes]);
+  const parkedNotes = useMemo(() => notes.filter(n => n.isParked), [notes]);
+
+  const getLinkedSession = useCallback((note: Note) => {
+    if (!note.linkedSessionId) return null;
+    return sessions.find(s => s.id === note.linkedSessionId) || null;
+  }, [sessions]);
+
+  const handleAdd = useCallback(() => {
+    if (!newNote.trim()) return;
+    onAdd(newNote);
+    setNewNote('');
+    setIsAdding(false);
+  }, [newNote, onAdd]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey && newNote.trim()) {
+      e.preventDefault();
+      handleAdd();
+    }
+    if (e.key === 'Escape') {
+      setIsAdding(false);
+      setNewNote('');
+    }
+  }, [handleAdd, newNote]);
+
+  const handleNoteUpdate = useCallback((id: string, content: string, details?: string) => {
+    onUpdate(id, content, details);
+  }, [onUpdate]);
+
+  // If a note is selected, show detail view
+  if (selectedNote) {
+    return (
+      <NoteDetail
+        note={selectedNote}
+        linkedSession={getLinkedSession(selectedNote)}
+        onBack={() => setSelectedNote(null)}
+        onUpdate={handleNoteUpdate}
+        onViewSession={onViewSession}
+      />
+    );
+  }
+
+  const NoteCard = ({ note, index }: { note: Note; index: number }) => (
+    <div
+      onClick={() => setSelectedNote(note)}
+      className={`
+        group relative cursor-pointer
+        ${getPastelColor(index)} 
+        rounded-xl p-4 transition-all duration-200
+        hover:shadow-soft hover:-translate-y-0.5
+        ${note.isParked ? 'opacity-75' : ''}
+      `}
+    >
+      <p className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed line-clamp-4">
+        {note.content}
+      </p>
+      
+      {note.details && (
+        <p className="text-xs text-text-muted mt-2 truncate">
+          + more details
+        </p>
+      )}
+      
+      <div className="flex items-center justify-between mt-3">
+        <p className="text-xs text-text-muted/60">
+          {format(new Date(note.createdAt), 'MMM d')}
+        </p>
+        
+        {/* Hover actions */}
+        <div 
+          className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {onToggleParked && (
+            <button
+              onClick={() => onToggleParked(note.id)}
+              className="flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors p-1.5 rounded-md hover:bg-foreground/5"
+              title={note.isParked ? 'Bring back' : 'Park for later'}
+            >
+              {note.isParked ? (
+                <>
+                  <ArrowLeft className="w-3 h-3" />
+                  <span>Now</span>
+                </>
+              ) : (
+                <>
+                  <span>Later</span>
+                  <ArrowRight className="w-3 h-3" />
+                </>
+              )}
+            </button>
+          )}
+          <button
+            onClick={() => onDelete(note.id)}
+            className="text-text-muted hover:text-destructive transition-colors p-1.5 rounded-md hover:bg-foreground/5"
+          >
+            <Trash2 className="w-3 h-3" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="h-full flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6 shrink-0">
+        <div>
+          <h2 className="text-lg font-serif text-foreground">Notes</h2>
+          <p className="text-xs text-text-muted mt-0.5">Now and later</p>
+        </div>
+        {!isAdding && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsAdding(true)}
+            className="h-8 w-8"
+          >
+            <Plus className="w-4 h-4" />
+          </Button>
+        )}
+      </div>
+
+      {/* Parked suggestion from AI */}
+      {parkedSuggestion && (
+        <div className="mb-5 p-4 bg-pastel-lavender rounded-xl animate-fade-in shrink-0">
+          <p className="text-xs text-text-muted mb-2">
+            You parked this thought earlier. Want to bring it back?
+          </p>
+          <p className="text-sm text-foreground/80 italic">"{parkedSuggestion}"</p>
+          <button
+            onClick={onDismissParkedSuggestion}
+            className="text-xs text-text-muted hover:text-text-secondary transition-colors mt-3"
+          >
+            Not now
+          </button>
+        </div>
+      )}
+
+      {/* New note input */}
+      {isAdding && (
+        <div className="mb-5 animate-slide-up shrink-0">
+          <textarea
+            value={newNote}
+            onChange={(e) => setNewNote(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Dump a thought..."
+            rows={2}
+            autoFocus
+            className="w-full bg-card border border-border/20 rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-text-muted/60 focus:outline-none focus:border-primary/30 resize-none"
+          />
+          <div className="flex justify-end gap-2 mt-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setIsAdding(false);
+                setNewNote('');
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleAdd}
+              disabled={!newNote.trim()}
+            >
+              Save
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Two lane layout */}
+      <div className="flex-1 min-h-0 grid grid-cols-2 gap-6 overflow-hidden">
+        {/* NOW lane */}
+        <div className="flex flex-col min-h-0">
+          <p className="text-xs text-text-muted/70 uppercase tracking-wider mb-4 shrink-0">Now</p>
+          <div className="flex-1 overflow-y-auto space-y-3 pr-2">
+            {activeNotes.length === 0 ? (
+              <p className="text-xs text-text-muted/50 py-8 text-center">
+                Clear for now.
+              </p>
+            ) : (
+              activeNotes.map((note, i) => (
+                <NoteCard key={note.id} note={note} index={i} />
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* LATER lane */}
+        <div className="flex flex-col min-h-0">
+          <p className="text-xs text-text-muted/70 uppercase tracking-wider mb-4 shrink-0">Later</p>
+          <div className="flex-1 overflow-y-auto space-y-3 pl-2">
+            {parkedNotes.length === 0 ? (
+              <p className="text-xs text-text-muted/50 py-8 text-center">
+                Nothing parked.
+              </p>
+            ) : (
+              parkedNotes.map((note, i) => (
+                <NoteCard key={note.id} note={note} index={i + activeNotes.length} />
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

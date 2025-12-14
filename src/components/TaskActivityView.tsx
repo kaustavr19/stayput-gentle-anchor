@@ -1,7 +1,8 @@
 import { FocusSession, ActivityEvent } from '@/types';
 import { format } from 'date-fns';
 import { ArrowLeft, Check, Pause, X, Clock, FileText, AlertCircle, Play } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface TaskActivityViewProps {
   session: FocusSession;
@@ -10,6 +11,9 @@ interface TaskActivityViewProps {
 }
 
 export function TaskActivityView({ session, linkedNotes, onBack }: TaskActivityViewProps) {
+  const [aiAnecdote, setAiAnecdote] = useState<string | null>(null);
+  const [isLoadingAnecdote, setIsLoadingAnecdote] = useState(false);
+
   const getEndStateLabel = () => {
     const completed = session.reflection?.completed;
     switch (completed) {
@@ -34,7 +38,6 @@ export function TaskActivityView({ session, linkedNotes, onBack }: TaskActivityV
   const buildTimeline = (): ActivityEvent[] => {
     const timeline: ActivityEvent[] = session.activities || [];
     
-    // If no activities stored, create minimal timeline
     if (timeline.length === 0) {
       const events: ActivityEvent[] = [
         { id: '1', type: 'session_started', timestamp: session.startedAt }
@@ -56,10 +59,41 @@ export function TaskActivityView({ session, linkedNotes, onBack }: TaskActivityV
   };
 
   const timeline = buildTimeline();
-
-  // Summarize distractions and pauses
   const distractionEvents = timeline.filter(e => e.type === 'distraction');
   const pauseEvents = timeline.filter(e => e.type === 'session_paused');
+
+  // Fetch AI anecdote
+  useEffect(() => {
+    const fetchAnecdote = async () => {
+      if (isLoadingAnecdote || aiAnecdote) return;
+      
+      // Only generate anecdote if there were pauses or distractions
+      if (pauseEvents.length === 0 && distractionEvents.length === 0) return;
+      
+      setIsLoadingAnecdote(true);
+      try {
+        const { data, error } = await supabase.functions.invoke('ai-assist', {
+          body: {
+            type: 'anecdote',
+            taskName: session.taskName,
+            context: session.context,
+            pauseReasons: pauseEvents.map(e => e.reason).filter(Boolean),
+            distractionCauses: distractionEvents.map(e => e.reason).filter(Boolean),
+          },
+        });
+
+        if (!error && data?.anecdote) {
+          setAiAnecdote(data.anecdote);
+        }
+      } catch (err) {
+        console.error('Failed to fetch anecdote:', err);
+      } finally {
+        setIsLoadingAnecdote(false);
+      }
+    };
+
+    fetchAnecdote();
+  }, [session.id]);
 
   const getEventIcon = (event: ActivityEvent) => {
     switch (event.type) {
@@ -115,7 +149,7 @@ export function TaskActivityView({ session, linkedNotes, onBack }: TaskActivityV
 
       {/* Task Header */}
       <div className="space-y-3">
-        <h1 className="text-2xl font-medium text-foreground tracking-tight">
+        <h1 className="text-2xl font-serif text-foreground tracking-tight">
           {session.taskName}
         </h1>
         <div className="flex items-center gap-3 text-sm">
@@ -133,7 +167,7 @@ export function TaskActivityView({ session, linkedNotes, onBack }: TaskActivityV
 
       {/* Activity Timeline */}
       <div className="space-y-4">
-        <h2 className="text-xs text-text-muted uppercase tracking-widest">Timeline</h2>
+        <h2 className="text-xs text-text-muted uppercase tracking-widest font-sans">Timeline</h2>
         <div className="space-y-3">
           {timeline.map((event) => (
             <div key={event.id} className="flex items-start gap-3 py-2">
@@ -141,11 +175,11 @@ export function TaskActivityView({ session, linkedNotes, onBack }: TaskActivityV
                 {getEventIcon(event)}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-foreground">{getEventLabel(event)}</p>
+                <p className="text-sm text-foreground font-sans">{getEventLabel(event)}</p>
                 {event.aiTip && (
-                  <p className="text-xs text-text-muted mt-1 italic">"{event.aiTip}"</p>
+                  <p className="text-xs text-text-muted mt-1 italic font-serif">"{event.aiTip}"</p>
                 )}
-                <p className="text-xs text-text-muted/60 mt-0.5">
+                <p className="text-xs text-text-muted/60 mt-0.5 font-sans">
                   {format(new Date(event.timestamp), 'h:mm a')}
                 </p>
               </div>
@@ -157,8 +191,8 @@ export function TaskActivityView({ session, linkedNotes, onBack }: TaskActivityV
       {/* Distractions & Pauses Summary */}
       {(distractionEvents.length > 0 || pauseEvents.length > 0) && (
         <div className="space-y-3">
-          <h2 className="text-xs text-text-muted uppercase tracking-widest">Summary</h2>
-          <div className="space-y-2 text-sm text-text-secondary">
+          <h2 className="text-xs text-text-muted uppercase tracking-widest font-sans">Summary</h2>
+          <div className="space-y-2 text-sm text-text-secondary font-sans">
             {pauseEvents.length > 0 && (
               <p>
                 You paused {pauseEvents.length === 1 ? 'once' : `${pauseEvents.length} times`}
@@ -182,18 +216,18 @@ export function TaskActivityView({ session, linkedNotes, onBack }: TaskActivityV
       {/* Linked Notes */}
       {linkedNotes.length > 0 && (
         <div className="space-y-3">
-          <h2 className="text-xs text-text-muted uppercase tracking-widest">Notes from this session</h2>
+          <h2 className="text-xs text-text-muted uppercase tracking-widest font-sans">Notes from this session</h2>
           <div className="space-y-2">
             {linkedNotes.map((note, i) => (
               <div 
                 key={i} 
                 className={`p-3 rounded-lg border ${
                   note.isParked 
-                    ? 'bg-surface/60 border-border/20' 
-                    : 'bg-card/40 border-border/10'
+                    ? 'bg-pastel-lavender border-border/20' 
+                    : 'bg-pastel-sand border-border/10'
                 }`}
               >
-                <p className="text-sm text-text-secondary">{note.content}</p>
+                <p className="text-sm text-foreground/80 font-sans">{note.content}</p>
                 {note.isParked && (
                   <span className="text-xs text-primary/70 mt-1 inline-block">parked</span>
                 )}
@@ -206,9 +240,19 @@ export function TaskActivityView({ session, linkedNotes, onBack }: TaskActivityV
       {/* Reflection note if exists */}
       {session.reflection?.note && (
         <div className="space-y-3">
-          <h2 className="text-xs text-text-muted uppercase tracking-widest">Reflection</h2>
+          <h2 className="text-xs text-text-muted uppercase tracking-widest font-sans">Reflection</h2>
           <p className="text-sm text-text-secondary font-serif italic">
             "{session.reflection.note}"
+          </p>
+        </div>
+      )}
+
+      {/* AI Anecdote — reflective, not instructive */}
+      {aiAnecdote && (
+        <div className="space-y-3 pt-4 border-t border-border/10">
+          <p className="text-xs text-text-muted/60 font-sans">A thought, not a verdict.</p>
+          <p className="text-sm text-text-secondary font-serif italic leading-relaxed">
+            {aiAnecdote}
           </p>
         </div>
       )}
