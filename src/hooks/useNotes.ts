@@ -5,13 +5,15 @@ import { useLocalStorage } from './useLocalStorage';
 export function useNotes() {
   const [notes, setNotes] = useLocalStorage<Note[]>('stayput-notes', []);
 
-  const addNote = useCallback((content: string) => {
+  const addNote = useCallback((content: string, linkedSessionId?: string) => {
     if (!content.trim()) return;
     
     const newNote: Note = {
       id: crypto.randomUUID(),
       content: content.trim(),
       createdAt: new Date(),
+      isParked: false,
+      linkedSessionId,
     };
     
     setNotes(prev => [newNote, ...prev]);
@@ -28,10 +30,22 @@ export function useNotes() {
     );
   }, [setNotes]);
 
+  const toggleParked = useCallback((id: string) => {
+    setNotes(prev =>
+      prev.map(n => n.id === id ? { ...n, isParked: !n.isParked } : n)
+    );
+  }, [setNotes]);
+
+  const getParkedNotes = useCallback(() => {
+    return notes.filter(n => n.isParked);
+  }, [notes]);
+
   return {
     notes,
     addNote,
     deleteNote,
     updateNote,
+    toggleParked,
+    getParkedNotes,
   };
 }

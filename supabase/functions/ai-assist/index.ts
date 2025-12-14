@@ -5,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// StayPut AI personality — calm internal monologue
+// StayPut AI personality — calm internal monologue (V1.1)
 const SYSTEM_PROMPT = `You are not a coach, therapist, or motivator.
 You speak like a calm internal monologue.
 You are concise, grounded, and slightly dry.
@@ -24,6 +24,11 @@ Hard rules:
 Tone: like a thoughtful friend who knows when to be quiet.`;
 
 const SUGGESTION_PROMPT = `The user wants help breaking down a task into small, concrete steps.
+
+You have access to their recent work context. Use it to:
+- Avoid suggesting steps they've already done
+- Suggest realistic continuations based on recent patterns
+- Keep suggestions smaller if they've been stopping due to energy or distraction
 
 Return EXACTLY 3-5 steps that:
 - Are specific and actionable within 20-40 minutes each
@@ -62,7 +67,7 @@ serve(async (req) => {
   }
 
   try {
-    const { type, intention, taskName } = await req.json();
+    const { type, intention, taskName, recentSessions, recentStopReasons } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
@@ -70,13 +75,22 @@ serve(async (req) => {
     }
 
     let userPrompt = "";
-    let responseFormat = "text";
 
     if (type === "suggest") {
-      userPrompt = `The user wants to work on: "${intention}"
+      // Build context from recent sessions (V1.1 context awareness)
+      let contextInfo = "";
+      if (recentSessions && recentSessions.length > 0) {
+        const recentTasks = recentSessions.slice(0, 5).map((s: any) => s.taskName).join(", ");
+        contextInfo += `\nRecent work: ${recentTasks}`;
+      }
+      if (recentStopReasons && recentStopReasons.length > 0) {
+        const reasons = recentStopReasons.slice(0, 3).join(", ");
+        contextInfo += `\nRecent stop reasons: ${reasons}`;
+      }
+
+      userPrompt = `The user wants to work on: "${intention}"${contextInfo}
 
 Break this down into 3-5 small, concrete next steps.`;
-      responseFormat = "json";
     } else if (type === "reframe") {
       userPrompt = taskName 
         ? `The user was working on "${taskName}" and got distracted.`
@@ -84,6 +98,8 @@ Break this down into 3-5 small, concrete next steps.`;
     } else {
       throw new Error("Invalid request type");
     }
+
+    console.log("AI assist request:", { type, intention, taskName, hasContext: !!recentSessions });
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -120,6 +136,7 @@ Break this down into 3-5 small, concrete next steps.`;
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "";
+    console.log("AI response received, type:", type);
 
     // Parse response based on type
     if (type === "suggest") {

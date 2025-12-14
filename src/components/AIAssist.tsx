@@ -6,9 +6,13 @@ import { toast } from '@/hooks/use-toast';
 
 interface AIAssistProps {
   onStartSession: (taskName: string) => void;
+  recentContext?: {
+    recentSessions: { taskName: string; context?: string }[];
+    recentStopReasons: string[];
+  };
 }
 
-export function AIAssist({ onStartSession }: AIAssistProps) {
+export function AIAssist({ onStartSession, recentContext }: AIAssistProps) {
   const [intention, setIntention] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -22,7 +26,12 @@ export function AIAssist({ onStartSession }: AIAssistProps) {
     
     try {
       const { data, error } = await supabase.functions.invoke('ai-assist', {
-        body: { type: 'suggest', intention: intention.trim() }
+        body: { 
+          type: 'suggest', 
+          intention: intention.trim(),
+          recentSessions: recentContext?.recentSessions,
+          recentStopReasons: recentContext?.recentStopReasons,
+        }
       });
 
       if (error) throw error;
