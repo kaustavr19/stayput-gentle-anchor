@@ -1,9 +1,16 @@
 import { useState, useCallback } from 'react';
 import { Note, FocusSession } from '@/types';
 import { Button } from '@/components/ui/button';
-import { Plus, Trash2, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Plus, Trash2, ArrowRight, ArrowLeft, MoreHorizontal } from 'lucide-react';
 import { format } from 'date-fns';
 import { NoteDetail } from './NoteDetail';
+import { DeleteConfirmDialog } from './DeleteConfirmDialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface NotepadTwoColumnProps {
   notes: Note[];
@@ -12,6 +19,7 @@ interface NotepadTwoColumnProps {
   onDelete: (id: string) => void;
   onUpdate?: (id: string, content: string, details?: string) => void;
   onToggleParked?: (id: string) => void;
+  onLinkSession?: (noteId: string, sessionId: string | null) => void;
   parkedSuggestion?: string | null;
   onDismissParkedSuggestion?: () => void;
 }
@@ -23,12 +31,14 @@ export function NotepadTwoColumn({
   onDelete, 
   onUpdate,
   onToggleParked,
+  onLinkSession,
   parkedSuggestion,
   onDismissParkedSuggestion 
 }: NotepadTwoColumnProps) {
   const [newNote, setNewNote] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+  const [noteToDelete, setNoteToDelete] = useState<string | null>(null);
 
   const activeNotes = notes.filter(n => !n.isParked);
   const parkedNotes = notes.filter(n => n.isParked);
@@ -62,15 +72,25 @@ export function NotepadTwoColumn({
     setSelectedNote(prev => prev?.id === id ? { ...prev, content, details } : prev);
   }, [onUpdate]);
 
+  const handleDeleteConfirm = useCallback(() => {
+    if (noteToDelete) {
+      onDelete(noteToDelete);
+      setNoteToDelete(null);
+    }
+  }, [noteToDelete, onDelete]);
+
   // Show detail view if a note is selected
   if (selectedNote) {
     return (
       <div className="h-full">
         <NoteDetail
           note={selectedNote}
+          sessions={sessions}
           linkedSession={getLinkedSession(selectedNote)}
           onBack={() => setSelectedNote(null)}
           onUpdate={handleNoteUpdate}
+          onLinkSession={onLinkSession}
+          onToggleParked={onToggleParked}
         />
       </div>
     );
@@ -99,38 +119,72 @@ export function NotepadTwoColumn({
         <p className="text-xs text-text-muted/60">
           {format(new Date(note.createdAt), 'MMM d')}
         </p>
-        <div className="flex items-center gap-1">
+        
+        {/* Desktop hover actions */}
+        <div 
+          className="hidden md:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={(e) => e.stopPropagation()}
+        >
           {onToggleParked && (
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleParked(note.id);
-              }}
+              onClick={() => onToggleParked(note.id)}
               className="flex items-center gap-1 text-xs text-text-muted hover:text-primary transition-colors p-1 rounded hover:bg-primary/10"
               title={note.isParked ? 'Move to Now' : 'Park for Later'}
             >
               {note.isParked ? (
                 <>
                   <ArrowLeft className="w-3 h-3" />
-                  <span className="opacity-0 group-hover:opacity-100 transition-opacity">Now</span>
+                  <span>Now</span>
                 </>
               ) : (
                 <>
-                  <span className="opacity-0 group-hover:opacity-100 transition-opacity">Later</span>
+                  <span>Later</span>
                   <ArrowRight className="w-3 h-3" />
                 </>
               )}
             </button>
           )}
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete(note.id);
-            }}
-            className="text-text-muted/50 hover:text-destructive transition-all p-1 rounded hover:bg-destructive/10 opacity-0 group-hover:opacity-100"
+            onClick={() => setNoteToDelete(note.id)}
+            className="flex items-center gap-1 text-xs text-text-muted/70 hover:text-destructive transition-all p-1 rounded hover:bg-destructive/10"
           >
             <Trash2 className="w-3 h-3" />
           </button>
+        </div>
+
+        {/* Mobile menu */}
+        <div className="md:hidden" onClick={(e) => e.stopPropagation()}>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="p-1 text-text-muted hover:text-text-secondary transition-colors">
+                <MoreHorizontal className="w-4 h-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-card border-border/20">
+              {onToggleParked && (
+                <DropdownMenuItem onClick={() => onToggleParked(note.id)}>
+                  {note.isParked ? (
+                    <>
+                      <ArrowLeft className="w-4 h-4 mr-2" />
+                      Move to Now
+                    </>
+                  ) : (
+                    <>
+                      <ArrowRight className="w-4 h-4 mr-2" />
+                      Park for Later
+                    </>
+                  )}
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem 
+                onClick={() => setNoteToDelete(note.id)}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </div>
@@ -242,6 +296,13 @@ export function NotepadTwoColumn({
           </div>
         </div>
       </div>
+
+      {/* Delete confirmation dialog */}
+      <DeleteConfirmDialog
+        open={noteToDelete !== null}
+        onOpenChange={(open) => !open && setNoteToDelete(null)}
+        onConfirm={handleDeleteConfirm}
+      />
     </div>
   );
 }

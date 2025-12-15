@@ -29,6 +29,7 @@ export interface Note {
   content: string;
   details?: string;
   createdAt: Date;
+  updatedAt?: Date;
   isParked?: boolean;
   linkedSessionId?: string;
 }

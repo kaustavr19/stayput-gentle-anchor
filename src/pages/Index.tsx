@@ -28,7 +28,7 @@ const Index = () => {
     hasActiveSession,
     isPaused 
   } = useFocusSession();
-  const { notes, addNote, deleteNote, updateNote, toggleParked, getParkedNotes } = useNotes();
+  const { notes, addNote, deleteNote, updateNote, toggleParked, linkToSession, getParkedNotes } = useNotes();
   
   // V1.1: App state for continuity features
   const {
@@ -141,6 +141,7 @@ const Index = () => {
             onDelete={deleteNote}
             onUpdate={updateNote}
             onToggleParked={toggleParked}
+            onLinkSession={linkToSession}
             parkedSuggestion={parkedSuggestion}
             onDismissParkedSuggestion={handleDismissParkedSuggestion}
           />
@@ -171,6 +172,7 @@ const Index = () => {
       onDelete={deleteNote}
       onUpdate={updateNote}
       onToggleParked={toggleParked}
+      onLinkSession={linkToSession}
     />
   ) : undefined;
 

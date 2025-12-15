@@ -1,9 +1,16 @@
 import { useState, useCallback, useMemo } from 'react';
 import { Note, FocusSession } from '@/types';
 import { Button } from '@/components/ui/button';
-import { Plus, Trash2, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Plus, Trash2, ArrowRight, ArrowLeft, MoreHorizontal } from 'lucide-react';
 import { format } from 'date-fns';
 import { NoteDetail } from './NoteDetail';
+import { DeleteConfirmDialog } from './DeleteConfirmDialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface NotesLanesProps {
   notes: Note[];
@@ -12,6 +19,7 @@ interface NotesLanesProps {
   onDelete: (id: string) => void;
   onUpdate: (id: string, content: string, details?: string) => void;
   onToggleParked?: (id: string) => void;
+  onLinkSession?: (noteId: string, sessionId: string | null) => void;
   onViewSession?: (sessionId: string) => void;
   parkedSuggestion?: string | null;
   onDismissParkedSuggestion?: () => void;
@@ -35,6 +43,7 @@ export function NotesLanes({
   onDelete, 
   onUpdate,
   onToggleParked,
+  onLinkSession,
   onViewSession,
   parkedSuggestion,
   onDismissParkedSuggestion 
@@ -42,6 +51,7 @@ export function NotesLanes({
   const [newNote, setNewNote] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+  const [noteToDelete, setNoteToDelete] = useState<string | null>(null);
 
   const activeNotes = useMemo(() => notes.filter(n => !n.isParked), [notes]);
   const parkedNotes = useMemo(() => notes.filter(n => n.isParked), [notes]);
@@ -71,16 +81,28 @@ export function NotesLanes({
 
   const handleNoteUpdate = useCallback((id: string, content: string, details?: string) => {
     onUpdate(id, content, details);
+    // Keep selected note in sync
+    setSelectedNote(prev => prev?.id === id ? { ...prev, content, details } : prev);
   }, [onUpdate]);
+
+  const handleDeleteConfirm = useCallback(() => {
+    if (noteToDelete) {
+      onDelete(noteToDelete);
+      setNoteToDelete(null);
+    }
+  }, [noteToDelete, onDelete]);
 
   // If a note is selected, show detail view
   if (selectedNote) {
     return (
       <NoteDetail
         note={selectedNote}
+        sessions={sessions}
         linkedSession={getLinkedSession(selectedNote)}
         onBack={() => setSelectedNote(null)}
         onUpdate={handleNoteUpdate}
+        onLinkSession={onLinkSession}
+        onToggleParked={onToggleParked}
         onViewSession={onViewSession}
       />
     );
@@ -112,9 +134,9 @@ export function NotesLanes({
           {format(new Date(note.createdAt), 'MMM d')}
         </p>
         
-        {/* Hover actions */}
+        {/* Desktop hover actions */}
         <div 
-          className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+          className="hidden md:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
           onClick={(e) => e.stopPropagation()}
         >
           {onToggleParked && (
@@ -137,11 +159,46 @@ export function NotesLanes({
             </button>
           )}
           <button
-            onClick={() => onDelete(note.id)}
-            className="text-text-muted hover:text-destructive transition-colors p-1.5 rounded-md hover:bg-foreground/5"
+            onClick={() => setNoteToDelete(note.id)}
+            className="flex items-center gap-1 text-xs text-text-muted hover:text-destructive transition-colors p-1.5 rounded-md hover:bg-foreground/5"
           >
             <Trash2 className="w-3 h-3" />
           </button>
+        </div>
+
+        {/* Mobile menu */}
+        <div className="md:hidden" onClick={(e) => e.stopPropagation()}>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="p-1 text-text-muted hover:text-text-secondary transition-colors">
+                <MoreHorizontal className="w-4 h-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-card border-border/20">
+              {onToggleParked && (
+                <DropdownMenuItem onClick={() => onToggleParked(note.id)}>
+                  {note.isParked ? (
+                    <>
+                      <ArrowLeft className="w-4 h-4 mr-2" />
+                      Move to Now
+                    </>
+                  ) : (
+                    <>
+                      <ArrowRight className="w-4 h-4 mr-2" />
+                      Park for Later
+                    </>
+                  )}
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem 
+                onClick={() => setNoteToDelete(note.id)}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </div>
@@ -251,6 +308,13 @@ export function NotesLanes({
           </div>
         </div>
       </div>
+
+      {/* Delete confirmation dialog */}
+      <DeleteConfirmDialog
+        open={noteToDelete !== null}
+        onOpenChange={(open) => !open && setNoteToDelete(null)}
+        onConfirm={handleDeleteConfirm}
+      />
     </div>
   );
 }
