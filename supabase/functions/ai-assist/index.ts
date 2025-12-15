@@ -71,6 +71,28 @@ Examples by cause:
 - Notification: "The message can wait."
 - Context switching: "Finish this thought first."`;
 
+const ANECDOTE_PROMPT = `The user has finished a focus session. Generate a brief reflective thought about what happened.
+
+You have access to:
+- Task name
+- Context (if any)
+- Pause reasons (if any)
+- Distraction causes (if any)
+
+Rules:
+- One short paragraph (2-3 sentences max)
+- Reflective, counterfactual tone
+- No "you should" language
+- No absolutes (always, never)
+- No performance or productivity language
+- No exclamation marks
+- Frame as observation, not advice
+
+Good examples:
+- "You paused when switching contexts. Narrowing the task earlier might have helped."
+- "Energy dropped midway. Starting with a smaller slice could make re-entry easier next time."
+- "The distractions clustered near the end. Shorter sessions might suit this kind of work."`;
+
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
