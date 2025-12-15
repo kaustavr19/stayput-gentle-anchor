@@ -166,8 +166,10 @@ const Index = () => {
   const sideContent = activeTab === 'focus' ? (
     <NotepadTwoColumn
       notes={notes}
+      sessions={sessions}
       onAdd={handleAddNote}
       onDelete={deleteNote}
+      onUpdate={updateNote}
       onToggleParked={toggleParked}
     />
   ) : undefined;
