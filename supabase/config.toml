@@ -2,4 +2,4 @@ project_id = "mkojyrruftrvllqnzmhi"
 
 [functions.ai-assist]
 enabled = true
-verify_jwt = false
+verify_jwt = true
