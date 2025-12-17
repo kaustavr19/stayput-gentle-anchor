@@ -1,9 +1,52 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+// Input validation constants
+const MAX_INPUT_LENGTH = 500;
+const MAX_ARRAY_LENGTH = 10;
+const MAX_ARRAY_ITEM_LENGTH = 200;
+const VALID_TYPES = ['suggest', 'reframe', 'distraction_tip', 'anecdote'] as const;
+
+// Helper to get CORS headers with origin validation
+function getCorsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get("origin") || "";
+  
+  // Allow Lovable preview domains and localhost for development
+  const allowedPatterns = [
+    /^https:\/\/.*\.lovableproject\.com$/,
+    /^https:\/\/.*\.lovable\.app$/,
+    /^http:\/\/localhost:\d+$/,
+    /^http:\/\/127\.0\.0\.1:\d+$/,
+  ];
+  
+  const isAllowed = allowedPatterns.some(pattern => pattern.test(origin));
+  
+  return {
+    "Access-Control-Allow-Origin": isAllowed ? origin : "https://lovable.app",
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Credentials": "true",
+  };
+}
+
+// Input validation helper
+function validateStringInput(value: unknown, fieldName: string, maxLength = MAX_INPUT_LENGTH): string | null {
+  if (value === undefined || value === null) return null;
+  if (typeof value !== 'string') return `${fieldName} must be a string`;
+  if (value.length > maxLength) return `${fieldName} exceeds maximum length`;
+  return null;
+}
+
+function validateArrayInput(value: unknown, fieldName: string): string | null {
+  if (value === undefined || value === null) return null;
+  if (!Array.isArray(value)) return `${fieldName} must be an array`;
+  if (value.length > MAX_ARRAY_LENGTH) return `${fieldName} exceeds maximum items`;
+  for (const item of value) {
+    if (typeof item !== 'string') return `${fieldName} items must be strings`;
+    if (item.length > MAX_ARRAY_ITEM_LENGTH) return `${fieldName} item exceeds maximum length`;
+  }
+  return null;
+}
 
 // StayPut AI personality — calm internal monologue (V1.1)
 const SYSTEM_PROMPT = `You are not a coach, therapist, or motivator.
@@ -95,25 +138,100 @@ Good examples:
 
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Verify authentication
+    // Validate JWT and get authenticated user
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      return new Response(JSON.stringify({ error: 'Authentication required' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const { type, intention, taskName, cause, context, pauseReasons, distractionCauses, recentSessions, recentStopReasons } = await req.json();
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+    if (authError || !user) {
+      console.error("Auth validation failed:", authError?.message);
+      return new Response(JSON.stringify({ error: 'Invalid authentication' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Parse and validate input
+    const body = await req.json();
+    const { type, intention, taskName, cause, context, pauseReasons, distractionCauses, recentSessions, recentStopReasons } = body;
+
+    // Validate type
+    if (!type || !VALID_TYPES.includes(type)) {
+      return new Response(JSON.stringify({ error: 'Invalid request type' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Validate string inputs
+    const stringValidations = [
+      validateStringInput(intention, 'intention'),
+      validateStringInput(taskName, 'taskName'),
+      validateStringInput(cause, 'cause'),
+      validateStringInput(context, 'context'),
+    ];
+    
+    for (const error of stringValidations) {
+      if (error) {
+        return new Response(JSON.stringify({ error }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
+    // Validate array inputs
+    const arrayValidations = [
+      validateArrayInput(pauseReasons, 'pauseReasons'),
+      validateArrayInput(distractionCauses, 'distractionCauses'),
+      validateArrayInput(recentStopReasons, 'recentStopReasons'),
+    ];
+
+    for (const error of arrayValidations) {
+      if (error) {
+        return new Response(JSON.stringify({ error }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
+    // Validate recentSessions structure
+    if (recentSessions !== undefined && recentSessions !== null) {
+      if (!Array.isArray(recentSessions) || recentSessions.length > MAX_ARRAY_LENGTH) {
+        return new Response(JSON.stringify({ error: 'Invalid recentSessions format' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+      console.error("LOVABLE_API_KEY not configured");
+      return new Response(JSON.stringify({ error: 'Service configuration error' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     let userPrompt = "";
@@ -122,15 +240,15 @@ serve(async (req) => {
       // Build context from recent sessions (V1.1 context awareness)
       let contextInfo = "";
       if (recentSessions && recentSessions.length > 0) {
-        const recentTasks = recentSessions.slice(0, 5).map((s: any) => s.taskName).join(", ");
-        contextInfo += `\nRecent work: ${recentTasks}`;
+        const recentTasks = recentSessions.slice(0, 5).map((s: { taskName?: string }) => s.taskName || '').filter(Boolean).join(", ");
+        if (recentTasks) contextInfo += `\nRecent work: ${recentTasks}`;
       }
       if (recentStopReasons && recentStopReasons.length > 0) {
         const reasons = recentStopReasons.slice(0, 3).join(", ");
         contextInfo += `\nRecent stop reasons: ${reasons}`;
       }
 
-      userPrompt = `The user wants to work on: "${intention}"${contextInfo}
+      userPrompt = `The user wants to work on: "${intention || ''}"${contextInfo}
 
 Break this down into 3-5 small, concrete next steps.`;
     } else if (type === "reframe") {
@@ -143,11 +261,9 @@ Break this down into 3-5 small, concrete next steps.`;
       const pauses = pauseReasons?.length ? `Paused for: ${pauseReasons.join(", ")}` : "";
       const distractions = distractionCauses?.length ? `Distracted by: ${distractionCauses.join(", ")}` : "";
       userPrompt = `Task: "${taskName || 'a task'}"${context ? ` (${context})` : ""}. ${pauses} ${distractions}. Provide a brief reflective observation.`;
-    } else {
-      throw new Error("Invalid request type");
     }
 
-    console.log("AI assist request:", { type, intention, taskName, cause, hasContext: !!recentSessions });
+    console.log("AI assist request:", { type, userId: user.id, hasContext: !!recentSessions });
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -177,24 +293,30 @@ Break this down into 3-5 small, concrete next steps.`;
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
-      throw new Error("AI service unavailable");
+      console.error("AI gateway error:", response.status);
+      return new Response(JSON.stringify({ error: "AI service temporarily unavailable" }), {
+        status: 503,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "";
-    console.log("AI response received, type:", type);
+    console.log("AI response received, type:", type, "userId:", user.id);
 
     // Parse response based on type
     if (type === "suggest") {
       // Extract JSON array from response
       const jsonMatch = content.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
-        const suggestions = JSON.parse(jsonMatch[0]);
-        return new Response(JSON.stringify({ suggestions }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        try {
+          const suggestions = JSON.parse(jsonMatch[0]);
+          return new Response(JSON.stringify({ suggestions }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        } catch {
+          // Fall through to fallback
+        }
       }
       // Fallback: split by newlines if JSON parsing fails
       const suggestions = content.split("\n").filter((line: string) => line.trim()).slice(0, 5);
@@ -212,9 +334,9 @@ Break this down into 3-5 small, concrete next steps.`;
     }
   } catch (error) {
     console.error("AI assist error:", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
+    return new Response(JSON.stringify({ error: "An unexpected error occurred" }), {
       status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
     });
   }
 });
