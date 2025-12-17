@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, memo } from 'react';
 import { Note, FocusSession } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Plus, Trash2, ArrowRight, ArrowLeft, MoreHorizontal } from 'lucide-react';
@@ -12,6 +12,123 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
+const pastelColors = [
+  'bg-pastel-blue',
+  'bg-pastel-lavender', 
+  'bg-pastel-sand',
+  'bg-pastel-mint',
+];
+
+function getPastelColor(index: number) {
+  return pastelColors[index % pastelColors.length];
+}
+
+interface NoteCardProps {
+  note: Note;
+  colorIndex: number;
+  onSelect: (note: Note) => void;
+  onToggleParked?: (id: string) => void;
+  onRequestDelete: (id: string) => void;
+}
+
+const NoteCard = memo(({ note, colorIndex, onSelect, onToggleParked, onRequestDelete }: NoteCardProps) => (
+  <div
+    onClick={() => onSelect(note)}
+    className={`
+      group relative cursor-pointer
+      ${getPastelColor(colorIndex)} 
+      rounded-xl p-4 transition-all duration-200
+      hover:shadow-soft hover:-translate-y-0.5
+      ${note.isParked ? 'opacity-75' : ''}
+    `}
+  >
+    <p className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed line-clamp-4">
+      {note.content}
+    </p>
+    
+    {note.details && (
+      <p className="text-xs text-text-muted mt-2 truncate">
+        + more details
+      </p>
+    )}
+    
+    <div className="flex items-center justify-between mt-3">
+      <p className="text-xs text-text-muted/60">
+        {format(new Date(note.createdAt), 'MMM d')}
+      </p>
+      
+      {/* Desktop hover actions */}
+      <div 
+        className="hidden md:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {onToggleParked && (
+          <button
+            onClick={() => onToggleParked(note.id)}
+            className="flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors p-1.5 rounded-md hover:bg-foreground/5"
+            title={note.isParked ? 'Bring back' : 'Park for later'}
+          >
+            {note.isParked ? (
+              <>
+                <ArrowLeft className="w-3 h-3" />
+                <span>Now</span>
+              </>
+            ) : (
+              <>
+                <span>Later</span>
+                <ArrowRight className="w-3 h-3" />
+              </>
+            )}
+          </button>
+        )}
+        <button
+          onClick={() => onRequestDelete(note.id)}
+          className="flex items-center gap-1 text-xs text-text-muted hover:text-destructive transition-colors p-1.5 rounded-md hover:bg-foreground/5"
+        >
+          <Trash2 className="w-3 h-3" />
+        </button>
+      </div>
+
+      {/* Mobile menu */}
+      <div className="md:hidden" onClick={(e) => e.stopPropagation()}>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="p-1 text-text-muted hover:text-text-secondary transition-colors">
+              <MoreHorizontal className="w-4 h-4" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="bg-card border-border/20">
+            {onToggleParked && (
+              <DropdownMenuItem onClick={() => onToggleParked(note.id)}>
+                {note.isParked ? (
+                  <>
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Move to Now
+                  </>
+                ) : (
+                  <>
+                    <ArrowRight className="w-4 h-4 mr-2" />
+                    Park for Later
+                  </>
+                )}
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem 
+              onClick={() => onRequestDelete(note.id)}
+              className="text-destructive focus:text-destructive"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
+  </div>
+));
+
+NoteCard.displayName = 'NoteCard';
+
 interface NotesLanesProps {
   notes: Note[];
   sessions: FocusSession[];
@@ -23,17 +140,6 @@ interface NotesLanesProps {
   onViewSession?: (sessionId: string) => void;
   parkedSuggestion?: string | null;
   onDismissParkedSuggestion?: () => void;
-}
-
-const pastelColors = [
-  'bg-pastel-blue',
-  'bg-pastel-lavender', 
-  'bg-pastel-sand',
-  'bg-pastel-mint',
-];
-
-function getPastelColor(index: number) {
-  return pastelColors[index % pastelColors.length];
 }
 
 export function NotesLanes({ 
@@ -81,7 +187,6 @@ export function NotesLanes({
 
   const handleNoteUpdate = useCallback((id: string, content: string, details?: string) => {
     onUpdate(id, content, details);
-    // Keep selected note in sync
     setSelectedNote(prev => prev?.id === id ? { ...prev, content, details } : prev);
   }, [onUpdate]);
 
@@ -91,6 +196,14 @@ export function NotesLanes({
       setNoteToDelete(null);
     }
   }, [noteToDelete, onDelete]);
+
+  const handleSelectNote = useCallback((note: Note) => {
+    setSelectedNote(note);
+  }, []);
+
+  const handleRequestDelete = useCallback((id: string) => {
+    setNoteToDelete(id);
+  }, []);
 
   // If a note is selected, show detail view
   if (selectedNote) {
@@ -107,102 +220,6 @@ export function NotesLanes({
       />
     );
   }
-
-  const NoteCard = ({ note, index }: { note: Note; index: number }) => (
-    <div
-      onClick={() => setSelectedNote(note)}
-      className={`
-        group relative cursor-pointer
-        ${getPastelColor(index)} 
-        rounded-xl p-4 transition-all duration-200
-        hover:shadow-soft hover:-translate-y-0.5
-        ${note.isParked ? 'opacity-75' : ''}
-      `}
-    >
-      <p className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed line-clamp-4">
-        {note.content}
-      </p>
-      
-      {note.details && (
-        <p className="text-xs text-text-muted mt-2 truncate">
-          + more details
-        </p>
-      )}
-      
-      <div className="flex items-center justify-between mt-3">
-        <p className="text-xs text-text-muted/60">
-          {format(new Date(note.createdAt), 'MMM d')}
-        </p>
-        
-        {/* Desktop hover actions */}
-        <div 
-          className="hidden md:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {onToggleParked && (
-            <button
-              onClick={() => onToggleParked(note.id)}
-              className="flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors p-1.5 rounded-md hover:bg-foreground/5"
-              title={note.isParked ? 'Bring back' : 'Park for later'}
-            >
-              {note.isParked ? (
-                <>
-                  <ArrowLeft className="w-3 h-3" />
-                  <span>Now</span>
-                </>
-              ) : (
-                <>
-                  <span>Later</span>
-                  <ArrowRight className="w-3 h-3" />
-                </>
-              )}
-            </button>
-          )}
-          <button
-            onClick={() => setNoteToDelete(note.id)}
-            className="flex items-center gap-1 text-xs text-text-muted hover:text-destructive transition-colors p-1.5 rounded-md hover:bg-foreground/5"
-          >
-            <Trash2 className="w-3 h-3" />
-          </button>
-        </div>
-
-        {/* Mobile menu */}
-        <div className="md:hidden" onClick={(e) => e.stopPropagation()}>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="p-1 text-text-muted hover:text-text-secondary transition-colors">
-                <MoreHorizontal className="w-4 h-4" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-card border-border/20">
-              {onToggleParked && (
-                <DropdownMenuItem onClick={() => onToggleParked(note.id)}>
-                  {note.isParked ? (
-                    <>
-                      <ArrowLeft className="w-4 h-4 mr-2" />
-                      Move to Now
-                    </>
-                  ) : (
-                    <>
-                      <ArrowRight className="w-4 h-4 mr-2" />
-                      Park for Later
-                    </>
-                  )}
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuItem 
-                onClick={() => setNoteToDelete(note.id)}
-                className="text-destructive focus:text-destructive"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <div className="h-full flex flex-col">
@@ -286,7 +303,14 @@ export function NotesLanes({
               </p>
             ) : (
               activeNotes.map((note, i) => (
-                <NoteCard key={note.id} note={note} index={i} />
+                <NoteCard 
+                  key={note.id} 
+                  note={note} 
+                  colorIndex={i}
+                  onSelect={handleSelectNote}
+                  onToggleParked={onToggleParked}
+                  onRequestDelete={handleRequestDelete}
+                />
               ))
             )}
           </div>
@@ -302,7 +326,14 @@ export function NotesLanes({
               </p>
             ) : (
               parkedNotes.map((note, i) => (
-                <NoteCard key={note.id} note={note} index={i + activeNotes.length} />
+                <NoteCard 
+                  key={note.id} 
+                  note={note} 
+                  colorIndex={i + activeNotes.length}
+                  onSelect={handleSelectNote}
+                  onToggleParked={onToggleParked}
+                  onRequestDelete={handleRequestDelete}
+                />
               ))
             )}
           </div>

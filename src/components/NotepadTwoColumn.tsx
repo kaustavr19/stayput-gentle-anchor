@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { Note, FocusSession } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Plus, Trash2, ArrowRight, ArrowLeft, MoreHorizontal } from 'lucide-react';
@@ -11,6 +11,109 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+
+interface NoteCardProps {
+  note: Note;
+  onSelect: (note: Note) => void;
+  onToggleParked?: (id: string) => void;
+  onRequestDelete: (id: string) => void;
+}
+
+const NoteCard = memo(({ note, onSelect, onToggleParked, onRequestDelete }: NoteCardProps) => (
+  <div
+    onClick={() => onSelect(note)}
+    className={`
+      group border rounded-lg p-3 transition-all cursor-pointer
+      ${note.isParked 
+        ? 'bg-surface/40 border-border/15 hover:bg-surface/60' 
+        : 'bg-card/40 border-border/10 hover:border-border/20 hover:bg-card/60'
+      }
+    `}
+  >
+    <p className="text-sm text-text-secondary whitespace-pre-wrap leading-relaxed line-clamp-3">
+      {note.content}
+    </p>
+    {note.details && (
+      <p className="text-xs text-text-muted/70 mt-1 line-clamp-1">
+        {note.details}
+      </p>
+    )}
+    <div className="flex items-center justify-between mt-2">
+      <p className="text-xs text-text-muted/60">
+        {format(new Date(note.createdAt), 'MMM d')}
+      </p>
+      
+      {/* Desktop hover actions */}
+      <div 
+        className="hidden md:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {onToggleParked && (
+          <button
+            onClick={() => onToggleParked(note.id)}
+            className="flex items-center gap-1 text-xs text-text-muted hover:text-primary transition-colors p-1 rounded hover:bg-primary/10"
+            title={note.isParked ? 'Move to Now' : 'Park for Later'}
+          >
+            {note.isParked ? (
+              <>
+                <ArrowLeft className="w-3 h-3" />
+                <span>Now</span>
+              </>
+            ) : (
+              <>
+                <span>Later</span>
+                <ArrowRight className="w-3 h-3" />
+              </>
+            )}
+          </button>
+        )}
+        <button
+          onClick={() => onRequestDelete(note.id)}
+          className="flex items-center gap-1 text-xs text-text-muted/70 hover:text-destructive transition-all p-1 rounded hover:bg-destructive/10"
+        >
+          <Trash2 className="w-3 h-3" />
+        </button>
+      </div>
+
+      {/* Mobile menu */}
+      <div className="md:hidden" onClick={(e) => e.stopPropagation()}>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="p-1 text-text-muted hover:text-text-secondary transition-colors">
+              <MoreHorizontal className="w-4 h-4" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="bg-card border-border/20">
+            {onToggleParked && (
+              <DropdownMenuItem onClick={() => onToggleParked(note.id)}>
+                {note.isParked ? (
+                  <>
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Move to Now
+                  </>
+                ) : (
+                  <>
+                    <ArrowRight className="w-4 h-4 mr-2" />
+                    Park for Later
+                  </>
+                )}
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem 
+              onClick={() => onRequestDelete(note.id)}
+              className="text-destructive focus:text-destructive"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
+  </div>
+));
+
+NoteCard.displayName = 'NoteCard';
 
 interface NotepadTwoColumnProps {
   notes: Note[];
@@ -68,7 +171,6 @@ export function NotepadTwoColumn({
 
   const handleNoteUpdate = useCallback((id: string, content: string, details?: string) => {
     onUpdate?.(id, content, details);
-    // Update selected note in state
     setSelectedNote(prev => prev?.id === id ? { ...prev, content, details } : prev);
   }, [onUpdate]);
 
@@ -78,6 +180,14 @@ export function NotepadTwoColumn({
       setNoteToDelete(null);
     }
   }, [noteToDelete, onDelete]);
+
+  const handleSelectNote = useCallback((note: Note) => {
+    setSelectedNote(note);
+  }, []);
+
+  const handleRequestDelete = useCallback((id: string) => {
+    setNoteToDelete(id);
+  }, []);
 
   // Show detail view if a note is selected
   if (selectedNote) {
@@ -95,100 +205,6 @@ export function NotepadTwoColumn({
       </div>
     );
   }
-
-  const NoteCard = ({ note }: { note: Note }) => (
-    <div
-      onClick={() => setSelectedNote(note)}
-      className={`
-        group border rounded-lg p-3 transition-all cursor-pointer
-        ${note.isParked 
-          ? 'bg-surface/40 border-border/15 hover:bg-surface/60' 
-          : 'bg-card/40 border-border/10 hover:border-border/20 hover:bg-card/60'
-        }
-      `}
-    >
-      <p className="text-sm text-text-secondary whitespace-pre-wrap leading-relaxed line-clamp-3">
-        {note.content}
-      </p>
-      {note.details && (
-        <p className="text-xs text-text-muted/70 mt-1 line-clamp-1">
-          {note.details}
-        </p>
-      )}
-      <div className="flex items-center justify-between mt-2">
-        <p className="text-xs text-text-muted/60">
-          {format(new Date(note.createdAt), 'MMM d')}
-        </p>
-        
-        {/* Desktop hover actions */}
-        <div 
-          className="hidden md:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {onToggleParked && (
-            <button
-              onClick={() => onToggleParked(note.id)}
-              className="flex items-center gap-1 text-xs text-text-muted hover:text-primary transition-colors p-1 rounded hover:bg-primary/10"
-              title={note.isParked ? 'Move to Now' : 'Park for Later'}
-            >
-              {note.isParked ? (
-                <>
-                  <ArrowLeft className="w-3 h-3" />
-                  <span>Now</span>
-                </>
-              ) : (
-                <>
-                  <span>Later</span>
-                  <ArrowRight className="w-3 h-3" />
-                </>
-              )}
-            </button>
-          )}
-          <button
-            onClick={() => setNoteToDelete(note.id)}
-            className="flex items-center gap-1 text-xs text-text-muted/70 hover:text-destructive transition-all p-1 rounded hover:bg-destructive/10"
-          >
-            <Trash2 className="w-3 h-3" />
-          </button>
-        </div>
-
-        {/* Mobile menu */}
-        <div className="md:hidden" onClick={(e) => e.stopPropagation()}>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="p-1 text-text-muted hover:text-text-secondary transition-colors">
-                <MoreHorizontal className="w-4 h-4" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-card border-border/20">
-              {onToggleParked && (
-                <DropdownMenuItem onClick={() => onToggleParked(note.id)}>
-                  {note.isParked ? (
-                    <>
-                      <ArrowLeft className="w-4 h-4 mr-2" />
-                      Move to Now
-                    </>
-                  ) : (
-                    <>
-                      <ArrowRight className="w-4 h-4 mr-2" />
-                      Park for Later
-                    </>
-                  )}
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuItem 
-                onClick={() => setNoteToDelete(note.id)}
-                className="text-destructive focus:text-destructive"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <div className="h-full flex flex-col">
@@ -274,7 +290,13 @@ export function NotepadTwoColumn({
               </p>
             ) : (
               activeNotes.map((note) => (
-                <NoteCard key={note.id} note={note} />
+                <NoteCard 
+                  key={note.id} 
+                  note={note} 
+                  onSelect={handleSelectNote}
+                  onToggleParked={onToggleParked}
+                  onRequestDelete={handleRequestDelete}
+                />
               ))
             )}
           </div>
@@ -290,7 +312,13 @@ export function NotepadTwoColumn({
               </p>
             ) : (
               parkedNotes.map((note) => (
-                <NoteCard key={note.id} note={note} />
+                <NoteCard 
+                  key={note.id} 
+                  note={note} 
+                  onSelect={handleSelectNote}
+                  onToggleParked={onToggleParked}
+                  onRequestDelete={handleRequestDelete}
+                />
               ))
             )}
           </div>
