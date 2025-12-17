@@ -1,70 +1,75 @@
-# Stayput Gentle Anchor
+# StayPut
 
-## Project Overview
+> A calm, opinionated focus app for knowledge workers. No gamification. No streaks. Just you and the work.
 
-The Stayput Gentle Anchor is designed for modern web development, providing a seamless experience for building reliable, versatile, and visually appealing interfaces. It focuses on user-friendliness, customization, and developer efficiency.
+StayPut is designed to help you focus without the noise. It provides a clean, distraction-free environment to manage your sessions, thoughts, and reflections. It's built on a local-first philosophy, ensuring your data stays with you, with optional backend integration ready when you need it.
 
-### Key Features:
-- **Ease of Use**: User-centric design ensuring hassle-free implementation.
-- **High Customizability**: Flexible and adaptable to various project needs.
-- **Modern Technologies**: Powered by cutting-edge frameworks and tools to ensure scalability and performance.
+## Features
 
----
+- **Focus Timer**: A simple, unobtrusive timer to track your deep work sessions.
+- **Distraction Logging**: Acknowledging distractions is the first step to managing them. Log them and move on.
+- **Parking Lot**: Have a thought mid-session? Park it in the notes area and stay in the flow.
+- **Session History & Reflection**: Review your past sessions and reflections to understand your work patterns better.
+- **Micro-Rituals**: Small, calm prompts to help you transition into work mode.
+- **Local-First**: Your data lives in your browser's local storage by default. Privacy first.
 
-## Technologies Used
+## Tech Stack
 
-This project is based on the following core technologies:
-- **Vite**: A fast front-end build tool and development server.
-- **TypeScript**: For strict and scalable JavaScript development.
-- **React**: A declarative JavaScript library for building user interfaces.
-- **shadcn-ui**: Components with great usability and aesthetics.
-- **Tailwind CSS**: Utility-first CSS framework for efficient styling.
+This project is built with modern web technologies for performance and developer experience:
 
----
+- **[Vite](https://vitejs.dev/)**: Fast frontend build tool.
+- **[React](https://reactjs.org/)**: UI library for building the interface.
+- **[TypeScript](https://www.typescriptlang.org/)**: For type safety and better developer experience.
+- **[Tailwind CSS](https://tailwindcss.com/)**: Utility-first CSS for styling.
+- **[shadcn/ui](https://ui.shadcn.com/)**: Beautifully designed, accessible components.
+- **[Supabase](https://supabase.com/)**: Database integration is set up and ready for future syncing capabilities (currently runs local-first).
 
 ## Getting Started
 
-Follow these steps to set up the project locally:
+Follow these steps to get StayPut running locally on your machine.
+
+### Prerequisites
+
+- Node.js (v18 or higher)
+- npm or bun
+
+### Installation
 
 1. Clone the repository:
    ```bash
    git clone https://github.com/kaustavr19/stayput-gentle-anchor.git
-   ```
-
-2. Navigate to the project directory:
-   ```bash
    cd stayput-gentle-anchor
    ```
 
-3. Install dependencies:
+2. Install dependencies:
    ```bash
    npm install
    ```
 
-4. Start the development server (with hot-reload):
+3. Start the development server:
    ```bash
    npm run dev
    ```
 
----
+4. Open your browser and navigate to `http://localhost:5173` (or the port shown in your terminal).
 
-## Deployment
+## Philosophy
 
-To deploy this project:
-- Ensure your changes are committed and pushed to the repository.
-- Use your preferred hosting service to deploy (e.g., Vercel, Netlify).
-- For additional deployment instructions, integrate with [Lovable](https://lovable.dev).
+StayPut is "opinionated" software. We believe that:
+- **Gamification is noise.** You don't need badges to do your work.
+- **Streaks create anxiety.** Missing a day shouldn't feel like a failure.
+- **Privacy matters.** Your focus data is personal.
 
----
+## Contributing
 
-## Contribution
+We welcome contributions that align with the calm and focused nature of the project.
 
-Want to contribute? We would love your support!
-- Fork the repository.
-- Create a feature branch (`git checkout -b feature/your-feature-name`).
-- Commit your changes.
-- Submit a pull request for review.
+1. Fork the repository.
+2. Create your feature branch (`git checkout -b feature/amazing-feature`).
+3. Commit your changes.
+4. Push to the branch.
+5. Open a Pull Request.
 
----
+## License
 
-Thank you for choosing Stayput Gentle Anchor!
+This project is open source.
