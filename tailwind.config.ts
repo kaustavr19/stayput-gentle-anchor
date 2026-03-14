@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['DM Sans', 'system-ui', 'sans-serif'],
-        serif: ['IBM Plex Serif', 'Georgia', 'serif'],
+        sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+        serif: ['Fraunces', 'Georgia', 'serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -63,6 +63,7 @@ export default {
         "pastel-lavender": "hsl(var(--pastel-lavender))",
         "pastel-sand": "hsl(var(--pastel-sand))",
         "pastel-mint": "hsl(var(--pastel-mint))",
+        "pastel-rose": "hsl(var(--pastel-rose))",
       },
       borderRadius: {
         lg: "var(--radius)",

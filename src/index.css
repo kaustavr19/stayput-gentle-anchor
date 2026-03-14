@@ -4,125 +4,136 @@
 
 @layer base {
   :root {
-    /* StayPut Design System — Light Mode (Morning paper) */
-    --bg-primary: 40 20% 97%;
-    --bg-secondary: 40 30% 99%;
-    --surface: 40 25% 95%;
-    
-    --text-primary: 220 25% 12%;
-    --text-secondary: 220 15% 35%;
-    --text-muted: 220 12% 55%;
-    
-    --accent-primary: 214 80% 45%;
-    --accent-soft: 214 80% 45%;
-    
+    /* StayPut Design System — Light Mode (Opera Air inspired) */
+
+    /* Backgrounds — warm cream, not stark white */
+    --bg-primary: 36 28% 97%;
+    --bg-secondary: 36 20% 99%;
+    --surface: 36 18% 95.5%;
+
+    /* Text — warm near-black, not harsh pure black */
+    --text-primary: 220 20% 13%;
+    --text-secondary: 220 14% 36%;
+    --text-muted: 220 10% 56%;
+
+    /* Accent — muted sage teal, calm and focused */
+    --accent-primary: 168 38% 37%;
+    --accent-hover: 168 38% 32%;
+    --accent-soft: 168 30% 94%;
+
+    /* Border */
     --border-subtle: 0 0% 0%;
-    
-    /* Pastel accents */
-    --pastel-blue: 214 60% 94%;
-    --pastel-lavender: 270 40% 95%;
-    --pastel-sand: 35 50% 95%;
-    --pastel-mint: 160 40% 94%;
-    
-    /* Semantic mappings */
+
+    /* Pastel note accents */
+    --pastel-blue: 210 50% 93%;
+    --pastel-lavender: 265 38% 93%;
+    --pastel-sand: 38 55% 92%;
+    --pastel-mint: 158 38% 91%;
+    --pastel-rose: 345 40% 93%;
+
+    /* Semantic mappings — ShadCN compatibility */
     --background: var(--bg-primary);
     --foreground: var(--text-primary);
-    
+
     --card: var(--bg-secondary);
     --card-foreground: var(--text-primary);
-    
+
     --popover: var(--bg-secondary);
     --popover-foreground: var(--text-primary);
-    
+
     --primary: var(--accent-primary);
     --primary-foreground: 0 0% 100%;
-    
+
     --secondary: var(--surface);
     --secondary-foreground: var(--text-secondary);
-    
+
     --muted: var(--surface);
     --muted-foreground: var(--text-muted);
-    
-    --accent: var(--surface);
-    --accent-foreground: var(--text-primary);
-    
+
+    --accent: var(--accent-soft);
+    --accent-foreground: var(--accent-primary);
+
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
-    
-    --border: 0 0% 0% / 0.06;
+
+    --border: 220 13% 91%;
     --input: var(--bg-secondary);
     --ring: var(--accent-primary);
-    
-    --radius: 12px;
-    
+
+    --radius: 14px;
+
     /* Typography */
-    --font-sans: 'DM Sans', system-ui, sans-serif;
-    --font-serif: 'IBM Plex Serif', Georgia, serif;
-    
+    --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+    --font-serif: 'Fraunces', Georgia, serif;
+
     /* Transitions */
     --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
-    
-    /* Shadows — softer for light mode */
-    --shadow-soft: 0 2px 16px -4px rgba(0, 0, 0, 0.06);
-    --shadow-glow: 0 0 32px -8px hsl(var(--accent-primary) / 0.12);
-    --shadow-surface: 0 1px 3px rgba(0, 0, 0, 0.03), 0 4px 12px rgba(0, 0, 0, 0.02);
+    --transition-smooth: 280ms cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Shadows — warm-tinted, layered depth */
+    --shadow-soft: 0 1px 2px hsl(220 20% 13% / 0.04), 0 4px 16px hsl(220 20% 13% / 0.06);
+    --shadow-card: 0 1px 3px hsl(220 20% 13% / 0.04), 0 8px 24px hsl(220 20% 13% / 0.06), 0 20px 48px hsl(220 20% 13% / 0.03);
+    --shadow-elevated: 0 4px 8px hsl(220 20% 13% / 0.06), 0 16px 40px hsl(220 20% 13% / 0.09), 0 32px 64px hsl(220 20% 13% / 0.05);
+    --shadow-glow: 0 0 32px -8px hsl(var(--accent-primary) / 0.18);
+    --shadow-surface: 0 1px 3px hsl(220 20% 13% / 0.03), 0 4px 12px hsl(220 20% 13% / 0.04);
   }
 
   .dark {
-    /* StayPut Design System — Dark Mode (Ink & Glass) */
-    --bg-primary: 220 20% 8%;
-    --bg-secondary: 220 18% 11%;
-    --surface: 220 16% 14%;
-    
-    --text-primary: 220 15% 92%;
-    --text-secondary: 220 12% 68%;
-    --text-muted: 220 10% 50%;
-    
-    --accent-primary: 214 90% 58%;
-    --accent-soft: 214 90% 58%;
-    
+    /* StayPut Design System — Dark Mode (Warm Ink) */
+    --bg-primary: 220 14% 9%;
+    --bg-secondary: 220 12% 12%;
+    --surface: 220 10% 15%;
+
+    --text-primary: 40 14% 91%;
+    --text-secondary: 220 10% 66%;
+    --text-muted: 220 8% 48%;
+
+    --accent-primary: 168 32% 52%;
+    --accent-hover: 168 32% 58%;
+    --accent-soft: 168 20% 15%;
+
     --border-subtle: 0 0% 100%;
-    
-    /* Pastel accents (muted for dark mode) */
-    --pastel-blue: 214 30% 18%;
-    --pastel-lavender: 270 20% 18%;
-    --pastel-sand: 35 25% 16%;
-    --pastel-mint: 160 20% 16%;
-    
-    /* Semantic mappings */
+
+    /* Pastel accents (muted for dark) */
+    --pastel-blue: 210 25% 17%;
+    --pastel-lavender: 265 18% 17%;
+    --pastel-sand: 38 22% 15%;
+    --pastel-mint: 158 18% 15%;
+    --pastel-rose: 345 18% 15%;
+
     --background: var(--bg-primary);
     --foreground: var(--text-primary);
-    
+
     --card: var(--surface);
     --card-foreground: var(--text-primary);
-    
+
     --popover: var(--surface);
     --popover-foreground: var(--text-primary);
-    
+
     --primary: var(--accent-primary);
     --primary-foreground: 0 0% 100%;
-    
+
     --secondary: var(--bg-secondary);
     --secondary-foreground: var(--text-secondary);
-    
+
     --muted: var(--bg-secondary);
     --muted-foreground: var(--text-muted);
-    
-    --accent: var(--surface);
-    --accent-foreground: var(--text-primary);
-    
+
+    --accent: var(--accent-soft);
+    --accent-foreground: var(--accent-primary);
+
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
-    
-    --border: 0 0% 100% / 0.06;
+
+    --border: 220 10% 20%;
     --input: var(--surface);
     --ring: var(--accent-primary);
-    
-    /* Shadows — subtle for dark mode */
-    --shadow-soft: 0 4px 24px -6px rgba(0, 0, 0, 0.4);
-    --shadow-glow: 0 0 40px -10px hsl(var(--accent-primary) / 0.25);
-    --shadow-surface: 0 1px 2px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.15);
+
+    --shadow-soft: 0 2px 8px hsl(0 0% 0% / 0.3), 0 8px 24px hsl(0 0% 0% / 0.2);
+    --shadow-card: 0 2px 8px hsl(0 0% 0% / 0.25), 0 12px 32px hsl(0 0% 0% / 0.2);
+    --shadow-elevated: 0 4px 16px hsl(0 0% 0% / 0.4), 0 24px 48px hsl(0 0% 0% / 0.3);
+    --shadow-glow: 0 0 40px -10px hsl(var(--accent-primary) / 0.28);
+    --shadow-surface: 0 1px 2px hsl(0 0% 0% / 0.2), 0 4px 12px hsl(0 0% 0% / 0.15);
   }
 }
 
@@ -130,121 +141,140 @@
   * {
     @apply border-border;
   }
-  
+
   body {
-    @apply bg-background text-foreground font-sans antialiased;
     font-family: var(--font-sans);
     font-size: 15px;
     line-height: 1.65;
     letter-spacing: -0.01em;
+    @apply bg-background text-foreground antialiased;
+    /* Opera Air ambient gradient — subtle blue at top-left, lavender at bottom-right */
+    background-image:
+      radial-gradient(ellipse 70% 45% at 5% 0%, hsl(210 55% 96% / 0.85) 0%, transparent 60%),
+      radial-gradient(ellipse 55% 40% at 95% 100%, hsl(265 40% 96% / 0.7) 0%, transparent 55%);
   }
-  
+
+  .dark body,
+  .dark {
+    background-image:
+      radial-gradient(ellipse 70% 45% at 5% 0%, hsl(210 30% 12% / 0.6) 0%, transparent 60%),
+      radial-gradient(ellipse 55% 40% at 95% 100%, hsl(265 25% 11% / 0.5) 0%, transparent 55%);
+  }
+
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-serif);
-    @apply font-medium tracking-tight;
-    letter-spacing: -0.02em;
+    @apply font-medium;
+    letter-spacing: -0.025em;
+    font-optical-sizing: auto;
   }
-  
-  /* Subtle scrollbar */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  
+
+  /* Subtle warm scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb {
-    background: hsl(var(--text-muted) / 0.2);
-    border-radius: 3px;
+    background: hsl(var(--text-muted) / 0.18);
+    border-radius: 4px;
   }
-  
   ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--text-muted) / 0.35);
+    background: hsl(var(--text-muted) / 0.3);
   }
 }
 
-/* Utility classes */
 @layer utilities {
-  .font-serif {
-    font-family: var(--font-serif);
-  }
-  
-  .font-sans {
-    font-family: var(--font-sans);
-  }
-  
-  .text-balance {
-    text-wrap: balance;
-  }
-  
-  .animate-fade-in {
-    animation: fadeIn var(--transition-smooth) ease-out;
-  }
-  
-  .animate-slide-up {
-    animation: slideUp var(--transition-smooth) ease-out;
-  }
-  
-  .animate-pulse-soft {
-    animation: pulseSoft 3s ease-in-out infinite;
-  }
-  
-  /* Glass effect */
+  .font-serif { font-family: var(--font-serif); }
+  .font-sans  { font-family: var(--font-sans); }
+
+  .text-balance { text-wrap: balance; }
+
+  /* Animations */
+  .animate-fade-in   { animation: fadeIn var(--transition-smooth) ease-out; }
+  .animate-slide-up  { animation: slideUp var(--transition-smooth) ease-out; }
+  .animate-pulse-soft { animation: pulseSoft 3s ease-in-out infinite; }
+
+  /* Glass */
   .glass {
-    background: hsl(var(--bg-secondary) / 0.7);
+    background: hsl(var(--bg-secondary) / 0.72);
+    backdrop-filter: blur(16px) saturate(1.2);
+    -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  }
+
+  .glass-surface {
+    background: hsl(var(--surface) / 0.65);
+    backdrop-filter: blur(10px) saturate(1.1);
+    -webkit-backdrop-filter: blur(10px) saturate(1.1);
+  }
+
+  /* Card with depth */
+  .card-depth {
+    background: hsl(var(--card));
+    box-shadow: var(--shadow-card);
+    border: 1px solid hsl(var(--border));
+  }
+
+  .card-surface {
+    background: hsl(var(--bg-secondary) / 0.6);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+    box-shadow: var(--shadow-soft);
+    border: 1px solid hsl(var(--border) / 0.7);
   }
-  
-  .glass-surface {
-    background: hsl(var(--surface) / 0.6);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-  }
-  
-  /* Editorial writing space */
-  .writing-space {
+
+  /* Note pastel cards */
+  .note-pastel-blue     { background: hsl(var(--pastel-blue)); }
+  .note-pastel-lavender { background: hsl(var(--pastel-lavender)); }
+  .note-pastel-sand     { background: hsl(var(--pastel-sand)); }
+  .note-pastel-mint     { background: hsl(var(--pastel-mint)); }
+  .note-pastel-rose     { background: hsl(var(--pastel-rose)); }
+
+  /* Input feel */
+  .input-calm {
     @apply bg-card/50 backdrop-blur-sm;
-    box-shadow: var(--shadow-surface);
+    border: 1px solid hsl(var(--border));
+    box-shadow: inset 0 1px 3px hsl(220 20% 13% / 0.04);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
   }
-  
-  /* Note card pastels */
-  .note-pastel-blue {
-    background: hsl(var(--pastel-blue));
+  .input-calm:focus {
+    border-color: hsl(var(--accent-primary) / 0.5);
+    box-shadow: inset 0 1px 3px hsl(220 20% 13% / 0.04), 0 0 0 3px hsl(var(--accent-primary) / 0.1);
+    outline: none;
   }
-  
-  .note-pastel-lavender {
-    background: hsl(var(--pastel-lavender));
+
+  /* Sage accent button */
+  .btn-sage {
+    background: hsl(var(--accent-primary));
+    color: white;
+    transition: background var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
   }
-  
-  .note-pastel-sand {
-    background: hsl(var(--pastel-sand));
+  .btn-sage:hover {
+    background: hsl(var(--accent-hover));
+    box-shadow: 0 4px 16px hsl(var(--accent-primary) / 0.3);
   }
-  
-  .note-pastel-mint {
-    background: hsl(var(--pastel-mint));
+  .btn-sage:active { transform: translateY(1px); }
+
+  /* Tab pill */
+  .tab-active {
+    background: hsl(var(--card));
+    box-shadow: var(--shadow-soft), 0 0 0 1px hsl(var(--border) / 0.6);
+    color: hsl(var(--text-primary));
   }
 }
 
 @keyframes fadeIn {
   from { opacity: 0; }
-  to { opacity: 1; }
+  to   { opacity: 1; }
 }
 
 @keyframes slideUp {
-  from { 
-    opacity: 0; 
-    transform: translateY(6px); 
-  }
-  to { 
-    opacity: 1; 
-    transform: translateY(0); 
-  }
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes pulseSoft {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+  50%       { opacity: 0.65; }
+}
+
+@keyframes timerPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
 }

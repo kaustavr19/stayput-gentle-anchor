@@ -1,23 +1,26 @@
 import { ReactNode } from 'react';
-import { Focus, StickyNote, History, Sparkles, Sun, Moon, User } from 'lucide-react';
+import { Focus, StickyNote, History, Sparkles, BarChart2, Sun, Moon, LogOut, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 
+export type AppTab = 'focus' | 'notes' | 'history' | 'analytics' | 'ai';
+
 interface LayoutProps {
   children: ReactNode;
-  activeTab: 'focus' | 'notes' | 'history' | 'ai';
-  onTabChange: (tab: 'focus' | 'notes' | 'history' | 'ai') => void;
+  activeTab: AppTab;
+  onTabChange: (tab: AppTab) => void;
   sideContent?: ReactNode;
 }
 
 const tabs = [
-  { id: 'focus' as const, label: 'Focus', icon: Focus },
-  { id: 'notes' as const, label: 'Notes', icon: StickyNote },
-  { id: 'history' as const, label: 'History', icon: History },
-  { id: 'ai' as const, label: 'Assist', icon: Sparkles },
+  { id: 'focus'     as const, label: 'Focus',     icon: Focus },
+  { id: 'notes'     as const, label: 'Notes',     icon: StickyNote },
+  { id: 'history'   as const, label: 'History',   icon: History },
+  { id: 'analytics' as const, label: 'Analytics', icon: BarChart2 },
+  { id: 'ai'        as const, label: 'Assist',    icon: Sparkles },
 ];
 
 export function Layout({ children, activeTab, onTabChange, sideContent }: LayoutProps) {
@@ -26,85 +29,89 @@ export function Layout({ children, activeTab, onTabChange, sideContent }: Layout
   const { user, signOut } = useAuth();
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Header — minimal, fades into background */}
-      <header className="px-4 py-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <span className="text-base font-serif font-medium text-foreground/80 tracking-tight">
-            StayPut
-          </span>
-          
-          <div className="flex items-center gap-1">
-            {/* Navigation — quiet tabs */}
-            <nav className="flex items-center gap-0.5 mr-3">
+    <div className="min-h-screen flex flex-col">
+      {/* Header — frosted glass, barely-there */}
+      <header className="sticky top-0 z-40 px-4 py-3">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between rounded-2xl px-4 py-2.5 glass border border-border/60 shadow-[0_1px_3px_hsl(220_20%_13%/0.06),0_4px_16px_hsl(220_20%_13%/0.05)]">
+            {/* Logo */}
+            <span className="text-base font-serif font-medium text-foreground/80 tracking-tight select-none">
+              StayPut
+            </span>
+
+            {/* Nav tabs — pill style */}
+            <nav className="flex items-center gap-0.5">
               {tabs.map(({ id, label, icon: Icon }) => (
                 <button
                   key={id}
                   onClick={() => onTabChange(id)}
                   className={cn(
-                    "flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all duration-200",
+                    "flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all duration-200",
                     activeTab === id
-                      ? "bg-foreground/5 text-foreground"
-                      : "text-text-muted/60 hover:text-text-muted"
+                      ? "tab-active text-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-foreground/5"
                   )}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">{label}</span>
                 </button>
               ))}
             </nav>
 
-            {/* Theme toggle */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="h-9 w-9 text-text-muted/50 hover:text-text-muted"
-            >
-              <Sun className="w-4 h-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-              <Moon className="absolute w-4 h-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-              <span className="sr-only">Toggle theme</span>
-            </Button>
-
-            {/* Auth button */}
-            {user ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => signOut()}
-                className="text-text-muted/60 hover:text-text-muted text-xs"
-              >
-                Sign out
-              </Button>
-            ) : (
+            {/* Right controls */}
+            <div className="flex items-center gap-1">
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => navigate('/auth')}
-                className="h-9 w-9 text-text-muted/50 hover:text-text-muted"
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                className="h-8 w-8 rounded-xl text-muted-foreground hover:text-foreground"
               >
-                <User className="w-4 h-4" />
-                <span className="sr-only">Sign in</span>
+                <Sun className="w-3.5 h-3.5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                <Moon className="absolute w-3.5 h-3.5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                <span className="sr-only">Toggle theme</span>
               </Button>
-            )}
+
+              {user ? (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => signOut()}
+                  title="Sign out"
+                  className="h-8 w-8 rounded-xl text-muted-foreground hover:text-foreground"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span className="sr-only">Sign out</span>
+                </Button>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => navigate('/auth')}
+                  className="h-8 w-8 rounded-xl text-muted-foreground hover:text-foreground"
+                >
+                  <User className="w-3.5 h-3.5" />
+                  <span className="sr-only">Sign in</span>
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Main content — more generous space */}
-      <main className="flex-1 flex px-4 py-6">
-        <div className="flex-1 max-w-6xl mx-auto flex gap-8">
-          {/* Primary surface — wider, more open */}
-          <div className="flex-1">
-            <div className="bg-card/30 backdrop-blur-sm rounded-2xl border border-border/10 p-6 min-h-[65vh]">
+      {/* Main content */}
+      <main className="flex-1 flex px-4 py-5">
+        <div className="flex-1 max-w-6xl mx-auto flex gap-6">
+          {/* Primary panel */}
+          <div className="flex-1 min-w-0">
+            <div className="card-depth rounded-2xl p-6 min-h-[68vh] animate-fade-in">
               {children}
             </div>
           </div>
 
-          {/* Side content (notepad on focus view) */}
+          {/* Sidebar (notepad on focus view) */}
           {sideContent && (
-            <aside className="hidden lg:block w-72 shrink-0">
-              <div className="sticky top-6 bg-card/20 backdrop-blur-sm rounded-2xl border border-border/10 p-5 h-[calc(100vh-10rem)]">
+            <aside className="hidden lg:block w-68 shrink-0">
+              <div className="sticky top-20 card-surface rounded-2xl p-5 h-[calc(100vh-8.5rem)] overflow-hidden">
                 {sideContent}
               </div>
             </aside>
@@ -112,10 +119,10 @@ export function Layout({ children, activeTab, onTabChange, sideContent }: Layout
         </div>
       </main>
 
-      {/* Footer — mantra */}
-      <footer className="px-4 py-5">
+      {/* Footer mantra */}
+      <footer className="px-4 py-4">
         <div className="max-w-6xl mx-auto">
-          <p className="text-xs text-text-muted/40 text-center font-serif italic">
+          <p className="text-xs text-muted-foreground/40 text-center font-serif italic tracking-wide">
             Stay present. Stay put.
           </p>
         </div>

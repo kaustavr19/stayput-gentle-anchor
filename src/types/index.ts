@@ -7,10 +7,14 @@ export interface ActivityEvent {
   noteContent?: string;
 }
 
+export type SessionMode = 'open' | 'pomodoro' | 'deep';
+
 export interface FocusSession {
   id: string;
   taskName: string;
   context?: string;
+  sessionMode?: SessionMode;
+  targetDuration?: number; // in seconds
   startedAt: Date;
   endedAt?: Date;
   isPaused?: boolean;
