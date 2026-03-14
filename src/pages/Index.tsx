@@ -5,7 +5,7 @@ import { ActiveSession } from '@/components/ActiveSession';
 import { NotesLanes } from '@/components/NotesLanes';
 import { NotepadTwoColumn } from '@/components/NotepadTwoColumn';
 import { SessionHistory } from '@/components/SessionHistory';
-import { AIAssist } from '@/components/AIAssist';
+import { AssistComingSoon } from '@/components/AssistComingSoon';
 import { Analytics } from '@/components/Analytics';
 import { useFocusSession } from '@/hooks/useFocusSession';
 import { useNotes } from '@/hooks/useNotes';
@@ -47,23 +47,6 @@ const Index = () => {
 
   const [microRitual] = useState(() => getMicroRitual());
   const tinyWinMessage = useMemo(() => getTinyWin(), [getTinyWin]);
-
-  const recentSessionContext = useMemo(() => {
-    const recent = sessions
-      .filter(s => s.endedAt)
-      .sort((a, b) => new Date(b.endedAt!).getTime() - new Date(a.endedAt!).getTime())
-      .slice(0, 5);
-
-    return {
-      recentSessions: recent.map(s => ({ taskName: s.taskName, context: s.context })),
-      recentStopReasons: recent.map(s => s.reflection?.stopReason).filter(Boolean),
-    };
-  }, [sessions]);
-
-  const handleStartFromAI = useCallback((taskName: string) => {
-    startSession(taskName);
-    setActiveTab('focus');
-  }, [startSession]);
 
   const handleEndSession = useCallback((reflection?: Parameters<typeof endSession>[0]) => {
     if (activeSession) recordSessionEnd(activeSession.taskName, activeSession.context);
@@ -150,12 +133,7 @@ const Index = () => {
         return <Analytics sessions={sessions} />;
 
       case 'ai':
-        return (
-          <AIAssist
-            onStartSession={handleStartFromAI}
-            recentContext={recentSessionContext}
-          />
-        );
+        return <AssistComingSoon />;
 
       default:
         return null;
