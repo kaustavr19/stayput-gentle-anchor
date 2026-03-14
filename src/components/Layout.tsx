@@ -17,11 +17,11 @@ interface LayoutProps {
 }
 
 const tabs = [
-  { id: 'focus'     as const, label: 'Focus',     icon: Focus },
-  { id: 'notes'     as const, label: 'Notes',     icon: StickyNote },
-  { id: 'history'   as const, label: 'History',   icon: History },
-  { id: 'analytics' as const, label: 'Analytics', icon: BarChart2 },
-  { id: 'ai'        as const, label: 'Assist',    icon: Sparkles },
+  { id: 'focus'     as const, label: 'Focus',     icon: Focus,     comingSoon: false },
+  { id: 'notes'     as const, label: 'Notes',     icon: StickyNote, comingSoon: false },
+  { id: 'history'   as const, label: 'History',   icon: History,   comingSoon: false },
+  { id: 'analytics' as const, label: 'Analytics', icon: BarChart2, comingSoon: false },
+  { id: 'ai'        as const, label: 'Assist',    icon: Sparkles,  comingSoon: true  },
 ];
 
 export function Layout({ children, activeTab, onTabChange, sideContent }: LayoutProps) {
@@ -40,12 +40,12 @@ export function Layout({ children, activeTab, onTabChange, sideContent }: Layout
 
             {/* Nav tabs — pill style */}
             <nav className="flex items-center gap-0.5">
-              {tabs.map(({ id, label, icon: Icon }) => (
+              {tabs.map(({ id, label, icon: Icon, comingSoon }) => (
                 <button
                   key={id}
                   onClick={() => onTabChange(id)}
                   className={cn(
-                    "flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all duration-200",
+                    "relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all duration-200",
                     activeTab === id
                       ? "tab-active text-foreground"
                       : "text-muted-foreground hover:text-foreground hover:bg-foreground/5"
@@ -53,6 +53,11 @@ export function Layout({ children, activeTab, onTabChange, sideContent }: Layout
                 >
                   <Icon className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">{label}</span>
+                  {comingSoon && (
+                    <span className="hidden sm:inline ml-0.5 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider rounded-full bg-primary/10 text-primary/70 leading-none">
+                      Soon
+                    </span>
+                  )}
                 </button>
               ))}
             </nav>
