@@ -5,6 +5,7 @@ import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { Logo } from '@/components/Logo';
 
 export type AppTab = 'focus' | 'notes' | 'history' | 'analytics' | 'ai';
 
@@ -35,9 +36,7 @@ export function Layout({ children, activeTab, onTabChange, sideContent }: Layout
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between rounded-2xl px-4 py-2.5 glass border border-border/60 shadow-[0_1px_3px_hsl(220_20%_13%/0.06),0_4px_16px_hsl(220_20%_13%/0.05)]">
             {/* Logo */}
-            <span className="text-base font-serif font-medium text-foreground/80 tracking-tight select-none">
-              StayPut
-            </span>
+            <Logo />
 
             {/* Nav tabs — pill style */}
             <nav className="flex items-center gap-0.5">
