@@ -5,7 +5,6 @@ import {
   doc,
   getDocs,
   setDoc,
-  updateDoc,
   deleteDoc,
   query,
   orderBy,
@@ -98,11 +97,11 @@ export function useNotes() {
   const updateNote = useCallback(async (id: string, content: string, details?: string) => {
     const now = new Date();
     setNotes(prev => prev.map(n => n.id === id ? { ...n, content, details, updatedAt: now } : n));
-    await updateDoc(noteDoc(id), {
+    await setDoc(noteDoc(id), {
       content,
       details: details ?? null,
       updatedAt: Timestamp.fromDate(now),
-    });
+    }, { merge: true });
   }, [noteDoc]);
 
   // ── toggleParked ───────────────────────────────────────────────────────
@@ -114,7 +113,7 @@ export function useNotes() {
       newParked = !n.isParked;
       return { ...n, isParked: newParked, updatedAt: now };
     }));
-    await updateDoc(noteDoc(id), { isParked: newParked, updatedAt: Timestamp.fromDate(now) });
+    await setDoc(noteDoc(id), { isParked: newParked, updatedAt: Timestamp.fromDate(now) }, { merge: true });
   }, [noteDoc]);
 
   // ── linkToSession ──────────────────────────────────────────────────────
@@ -123,10 +122,10 @@ export function useNotes() {
     setNotes(prev =>
       prev.map(n => n.id === noteId ? { ...n, linkedSessionId: sessionId ?? undefined, updatedAt: now } : n)
     );
-    await updateDoc(noteDoc(noteId), {
+    await setDoc(noteDoc(noteId), {
       linkedSessionId: sessionId,
       updatedAt: Timestamp.fromDate(now),
-    });
+    }, { merge: true });
   }, [noteDoc]);
 
   // ── getParkedNotes ─────────────────────────────────────────────────────

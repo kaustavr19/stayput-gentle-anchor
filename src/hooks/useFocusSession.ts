@@ -5,7 +5,6 @@ import {
   doc,
   getDocs,
   setDoc,
-  updateDoc,
   query,
   orderBy,
   Timestamp,
@@ -145,14 +144,15 @@ export function useFocusSession() {
     activities: [...(session.activities ?? []), { ...event, id: crypto.randomUUID() }],
   }), []);
 
-  const syncSession = useCallback(async (session: FocusSession, isNew = false) => {
+  const syncSession = useCallback(async (session: FocusSession) => {
     if (!user) return;
-    const ref = sessionDoc(session.id);
-    const data = toFirestore(session);
-    if (isNew) {
-      await setDoc(ref, data);
-    } else {
-      await updateDoc(ref, data as Parameters<typeof updateDoc>[1]);
+    try {
+      // setDoc with merge:true works for both create and update, avoiding
+      // NOT_FOUND errors when a pause/distraction fires before the initial
+      // setDoc has finished writing to the Firestore server.
+      await setDoc(sessionDoc(session.id), toFirestore(session), { merge: true });
+    } catch (err) {
+      console.error('[StayPut] Firestore sync failed for session', session.id, err);
     }
   }, [user, sessionDoc]);
 
@@ -170,7 +170,7 @@ export function useFocusSession() {
     };
     setSessions(prev => [newSession, ...prev]);
     setActiveSession(newSession);
-    await syncSession(newSession, true);
+    await syncSession(newSession);
     return newSession;
   }, [syncSession]);
 
