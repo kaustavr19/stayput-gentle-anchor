@@ -1,36 +1,40 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import { Layout } from '@/components/Layout';
+import { Layout, AppTab } from '@/components/Layout';
 import { StartSession } from '@/components/StartSession';
 import { ActiveSession } from '@/components/ActiveSession';
 import { NotesLanes } from '@/components/NotesLanes';
 import { NotepadTwoColumn } from '@/components/NotepadTwoColumn';
 import { SessionHistory } from '@/components/SessionHistory';
 import { AIAssist } from '@/components/AIAssist';
+import { Analytics } from '@/components/Analytics';
 import { useFocusSession } from '@/hooks/useFocusSession';
 import { useNotes } from '@/hooks/useNotes';
 import { useAppState } from '@/hooks/useAppState';
 import { Helmet } from 'react-helmet-async';
 
-type Tab = 'focus' | 'notes' | 'history' | 'ai';
-
 const Index = () => {
-  const [activeTab, setActiveTab] = useState<Tab>('focus');
-  const { 
-    sessions, 
-    activeSession, 
-    elapsedTime, 
+  const [activeTab, setActiveTab] = useState<AppTab>('focus');
+  const {
+    sessions,
+    activeSession,
+    elapsedTime,
     formattedTime,
-    startSession, 
+    isLoading,
+    isInBreak,
+    breakTimeLeft,
+    startSession,
     pauseSession,
     resumeSession,
     logDistraction,
-    endSession, 
+    endSession,
+    startBreak,
+    skipBreak,
     hasActiveSession,
-    isPaused 
+    isPaused,
   } = useFocusSession();
+
   const { notes, addNote, deleteNote, updateNote, toggleParked, linkToSession, getParkedNotes } = useNotes();
-  
-  // V1.1: App state for continuity features
+
   const {
     continuationContext,
     getMicroRitual,
@@ -39,32 +43,20 @@ const Index = () => {
     checkDailyReset,
   } = useAppState(sessions);
 
-  // Check for daily reset on mount
-  useEffect(() => {
-    checkDailyReset();
-  }, [checkDailyReset]);
+  useEffect(() => { checkDailyReset(); }, [checkDailyReset]);
 
-  // Get micro-ritual on mount (only once)
   const [microRitual] = useState(() => getMicroRitual());
-
-  // Prepare tiny win message for session end
   const tinyWinMessage = useMemo(() => getTinyWin(), [getTinyWin]);
 
-  // Get recent context for AI
   const recentSessionContext = useMemo(() => {
     const recent = sessions
       .filter(s => s.endedAt)
       .sort((a, b) => new Date(b.endedAt!).getTime() - new Date(a.endedAt!).getTime())
       .slice(0, 5);
-    
+
     return {
-      recentSessions: recent.map(s => ({ 
-        taskName: s.taskName, 
-        context: s.context 
-      })),
-      recentStopReasons: recent
-        .map(s => s.reflection?.stopReason)
-        .filter(Boolean),
+      recentSessions: recent.map(s => ({ taskName: s.taskName, context: s.context })),
+      recentStopReasons: recent.map(s => s.reflection?.stopReason).filter(Boolean),
     };
   }, [sessions]);
 
@@ -74,25 +66,18 @@ const Index = () => {
   }, [startSession]);
 
   const handleEndSession = useCallback((reflection?: Parameters<typeof endSession>[0]) => {
-    if (activeSession) {
-      recordSessionEnd(activeSession.taskName, activeSession.context);
-    }
+    if (activeSession) recordSessionEnd(activeSession.taskName, activeSession.context);
     endSession(reflection);
   }, [activeSession, endSession, recordSessionEnd]);
 
-  // Parked note suggestion (occasionally show a parked note)
   const [parkedSuggestion, setParkedSuggestion] = useState<string | null>(null);
   const [dismissedParkedSuggestion, setDismissedParkedSuggestion] = useState(false);
 
   useEffect(() => {
-    // Only show parked suggestions sometimes (20% chance) and only if not dismissed
-    if (dismissedParkedSuggestion) return;
-    if (Math.random() > 0.2) return;
-    
+    if (dismissedParkedSuggestion || Math.random() > 0.2) return;
     const parked = getParkedNotes();
     if (parked.length > 0) {
-      const randomParked = parked[Math.floor(Math.random() * parked.length)];
-      setParkedSuggestion(randomParked.content);
+      setParkedSuggestion(parked[Math.floor(Math.random() * parked.length)].content);
     }
   }, [getParkedNotes, dismissedParkedSuggestion]);
 
@@ -101,10 +86,17 @@ const Index = () => {
     setDismissedParkedSuggestion(true);
   }, []);
 
-  // Handle adding note with session link
   const handleAddNote = useCallback((content: string) => {
     addNote(content, activeSession?.id);
   }, [addNote, activeSession]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-5 h-5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+      </div>
+    );
+  }
 
   const renderContent = () => {
     switch (activeTab) {
@@ -116,22 +108,26 @@ const Index = () => {
               elapsedTime={elapsedTime}
               formattedTime={formattedTime}
               isPaused={isPaused}
+              isInBreak={isInBreak}
+              breakTimeLeft={breakTimeLeft}
               onEnd={handleEndSession}
               onPause={pauseSession}
               onResume={resumeSession}
               onDistraction={logDistraction}
+              onStartBreak={startBreak}
+              onSkipBreak={skipBreak}
               tinyWinMessage={tinyWinMessage}
             />
           );
         }
         return (
-          <StartSession 
+          <StartSession
             onStart={startSession}
             continuationContext={continuationContext}
             microRitual={microRitual}
           />
         );
-      
+
       case 'notes':
         return (
           <NotesLanes
@@ -146,24 +142,26 @@ const Index = () => {
             onDismissParkedSuggestion={handleDismissParkedSuggestion}
           />
         );
-      
+
       case 'history':
         return <SessionHistory sessions={sessions} notes={notes} />;
-      
+
+      case 'analytics':
+        return <Analytics sessions={sessions} />;
+
       case 'ai':
         return (
-          <AIAssist 
+          <AIAssist
             onStartSession={handleStartFromAI}
             recentContext={recentSessionContext}
           />
         );
-      
+
       default:
         return null;
     }
   };
 
-  // Show notepad in sidebar when on focus tab
   const sideContent = activeTab === 'focus' ? (
     <NotepadTwoColumn
       notes={notes}
@@ -180,17 +178,13 @@ const Index = () => {
     <>
       <Helmet>
         <title>StayPut — Focus Without the Noise</title>
-        <meta 
-          name="description" 
-          content="A calm, opinionated focus app for knowledge workers. No gamification. No streaks. Just you and the work." 
+        <meta
+          name="description"
+          content="A calm, opinionated focus app for knowledge workers. No gamification. No streaks. Just you and the work."
         />
       </Helmet>
-      
-      <Layout 
-        activeTab={activeTab} 
-        onTabChange={setActiveTab}
-        sideContent={sideContent}
-      >
+
+      <Layout activeTab={activeTab} onTabChange={setActiveTab} sideContent={sideContent}>
         {renderContent()}
       </Layout>
     </>

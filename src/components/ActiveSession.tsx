@@ -11,27 +11,37 @@ interface ActiveSessionProps {
   elapsedTime: number;
   formattedTime: string;
   isPaused: boolean;
+  isInBreak?: boolean;
+  breakTimeLeft?: number;
   onEnd: (reflection?: FocusSession['reflection']) => void;
   onPause: (reason?: PauseReason, customReason?: string) => void;
   onResume: () => void;
   onDistraction: (cause?: DistractionCause, customCause?: string, aiTip?: string) => void;
+  onStartBreak?: () => void;
+  onSkipBreak?: () => void;
   tinyWinMessage?: string | null;
 }
 
 type CompletionState = 'yes' | 'partially' | 'no' | null;
 type StopReason = 'finished' | 'distracted' | 'energy' | 'time' | 'skipped';
 
-export function ActiveSession({ 
-  session, 
-  elapsedTime, 
+export function ActiveSession({
+  session,
+  elapsedTime,
   formattedTime,
   isPaused,
+  isInBreak = false,
+  breakTimeLeft = 0,
   onEnd,
   onPause,
   onResume,
   onDistraction,
-  tinyWinMessage 
+  onStartBreak,
+  onSkipBreak,
+  tinyWinMessage,
 }: ActiveSessionProps) {
+  // Auto-prompt break when Pomodoro timer completes
+  const isTimerComplete = !!session.targetDuration && elapsedTime >= session.targetDuration && !isInBreak;
   const [showReflection, setShowReflection] = useState(false);
   const [completed, setCompleted] = useState<CompletionState>(null);
   const [stopReason, setStopReason] = useState<StopReason | null>(null);
@@ -238,8 +248,39 @@ export function ActiveSession({
 
       {/* Timer — centered, calm */}
       <div className="flex justify-center py-8">
-        <FocusTimer elapsedSeconds={elapsedTime} formattedTime={formattedTime} isPaused={isPaused} />
+        <FocusTimer
+          elapsedSeconds={elapsedTime}
+          formattedTime={formattedTime}
+          isPaused={isPaused}
+          targetDuration={session.targetDuration}
+          isInBreak={isInBreak}
+          breakTimeLeft={breakTimeLeft}
+        />
       </div>
+
+      {/* Pomodoro complete prompt */}
+      {isTimerComplete && !isInBreak && (
+        <div className="rounded-xl border border-primary/20 bg-primary/[0.05] p-4 space-y-3 animate-fade-in">
+          <p className="text-sm text-foreground font-medium">25 minutes done. Time for a break?</p>
+          <div className="flex gap-2">
+            <Button size="sm" onClick={onStartBreak} className="btn-sage text-xs rounded-lg h-8 px-4">
+              Take 5 min break
+            </Button>
+            <Button size="sm" variant="ghost" onClick={onSkipBreak} className="text-muted-foreground text-xs h-8 px-3">
+              Keep going
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Break controls */}
+      {isInBreak && (
+        <div className="text-center animate-fade-in">
+          <Button size="sm" variant="ghost" onClick={onSkipBreak} className="text-muted-foreground text-xs border border-border">
+            Skip break
+          </Button>
+        </div>
+      )}
 
       {/* Pause/Distraction prompts */}
       {showPausePrompt && (
