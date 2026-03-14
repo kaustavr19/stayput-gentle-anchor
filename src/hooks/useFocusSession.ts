@@ -157,7 +157,7 @@ export function useFocusSession() {
   }, [user, sessionDoc]);
 
   // ── startSession ──────────────────────────────────────────────────────
-  const startSession = useCallback((taskName: string, context?: string, mode: SessionMode = 'open') => {
+  const startSession = useCallback(async (taskName: string, context?: string, mode: SessionMode = 'open') => {
     const now = new Date();
     const newSession: FocusSession = {
       id: crypto.randomUUID(),
@@ -170,7 +170,7 @@ export function useFocusSession() {
     };
     setSessions(prev => [newSession, ...prev]);
     setActiveSession(newSession);
-    syncSession(newSession, true);
+    await syncSession(newSession, true);
     return newSession;
   }, [syncSession]);
 
@@ -215,7 +215,7 @@ export function useFocusSession() {
   }, [activeSession, addActivity, syncSession]);
 
   // ── endSession ────────────────────────────────────────────────────────
-  const endSession = useCallback((reflection?: FocusSession['reflection']) => {
+  const endSession = useCallback(async (reflection?: FocusSession['reflection']) => {
     if (!activeSession) return;
     const updated: FocusSession = {
       ...addActivity(activeSession, { type: 'session_ended', timestamp: new Date(), reason: reflection?.stopReason }),
@@ -223,10 +223,13 @@ export function useFocusSession() {
       isPaused: false,
       reflection,
     };
+    // Update UI immediately (optimistic), then await the Firestore write.
+    // Awaiting here ensures endedAt is persisted before the caller returns —
+    // so a hard refresh right after ending won't reload the session as active.
     setSessions(prev => prev.map(s => s.id === updated.id ? updated : s));
     setActiveSession(null);
     setIsInBreak(false);
-    syncSession(updated);
+    await syncSession(updated);
     return updated;
   }, [activeSession, addActivity, syncSession]);
 
