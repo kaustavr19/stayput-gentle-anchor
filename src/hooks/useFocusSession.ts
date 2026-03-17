@@ -14,6 +14,11 @@ import { useAuth } from './useAuth';
 
 // ─── Conversion helpers ────────────────────────────────────────────────────
 
+/** Strip keys whose value is `undefined` — Firestore rejects them. */
+function stripUndefined<T extends Record<string, unknown>>(obj: T): T {
+  return Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined)) as T;
+}
+
 function toFirestore(session: FocusSession) {
   return {
     taskName:        session.taskName,
@@ -25,11 +30,14 @@ function toFirestore(session: FocusSession) {
     isPaused:        session.isPaused ?? false,
     pausedAt:        session.pausedAt ? Timestamp.fromDate(new Date(session.pausedAt)) : null,
     totalPausedTime: session.totalPausedTime ?? 0,
-    activities:      (session.activities ?? []).map(a => ({
-      ...a,
+    activities:      (session.activities ?? []).map(a => stripUndefined({
+      id:        a.id,
+      type:      a.type,
       timestamp: Timestamp.fromDate(new Date(a.timestamp)),
+      reason:    a.reason,
+      aiTip:     a.aiTip,
     })),
-    reflection:      session.reflection ?? null,
+    reflection:      session.reflection ? stripUndefined({ ...session.reflection }) : null,
   };
 }
 
