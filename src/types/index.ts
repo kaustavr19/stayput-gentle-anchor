@@ -7,7 +7,7 @@ export interface ActivityEvent {
   noteContent?: string;
 }
 
-export type SessionMode = 'open' | 'pomodoro' | 'deep';
+export type SessionMode = 'open' | 'pomodoro' | 'deep' | 'custom';
 
 export interface FocusSession {
   id: string;

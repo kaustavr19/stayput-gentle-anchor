@@ -73,6 +73,30 @@ export function getXPTier(xp: number) {
   return XP_TIERS.find(t => xp >= t.min) ?? XP_TIERS[XP_TIERS.length - 1];
 }
 
+// ─── Backfill leaderboard from all sessions (called on login) ────────────────
+
+export async function backfillLeaderboard(
+  uid: string,
+  displayName: string,
+  photoURL: string | null,
+  sessions: FocusSession[],
+): Promise<void> {
+  const completed = sessions.filter(s => s.endedAt);
+  if (completed.length === 0) return;
+
+  const totalXP           = completed.reduce((sum, s) => sum + calculateSessionXP(s), 0);
+  const totalFocusMinutes = completed.reduce((sum, s) => sum + getFocusedMinutes(s), 0);
+
+  await setDoc(doc(db, 'leaderboard', uid), {
+    displayName,
+    photoURL,
+    totalXP,
+    totalSessions: completed.length,
+    totalFocusMinutes,
+    updatedAt: Timestamp.now(),
+  });
+}
+
 // ─── Update leaderboard after a session ends ─────────────────────────────────
 
 export async function updateLeaderboard(
