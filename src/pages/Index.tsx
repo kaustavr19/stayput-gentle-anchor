@@ -7,6 +7,7 @@ import { NotepadTwoColumn } from '@/components/NotepadTwoColumn';
 import { SessionHistory } from '@/components/SessionHistory';
 import { AssistComingSoon } from '@/components/AssistComingSoon';
 import { Analytics } from '@/components/Analytics';
+import { Leaderboard } from '@/components/Leaderboard';
 import { useFocusSession } from '@/hooks/useFocusSession';
 import { useNotes } from '@/hooks/useNotes';
 import { useAppState } from '@/hooks/useAppState';
@@ -134,6 +135,9 @@ const Index = () => {
 
       case 'ai':
         return <AssistComingSoon />;
+
+      case 'leaderboard':
+        return <Leaderboard />;
 
       default:
         return null;

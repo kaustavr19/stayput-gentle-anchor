@@ -292,7 +292,7 @@ export function NotesLanes({
       )}
 
       {/* Two lane layout */}
-      <div className="flex-1 min-h-0 grid grid-cols-2 gap-6 overflow-hidden">
+      <div className="flex-1 min-h-0 grid grid-cols-1 sm:grid-cols-2 gap-6 overflow-hidden">
         {/* NOW lane */}
         <div className="flex flex-col min-h-0">
           <p className="text-xs text-muted-foreground uppercase tracking-wider mb-4 shrink-0">Now</p>
