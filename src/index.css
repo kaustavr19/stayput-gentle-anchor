@@ -13,8 +13,8 @@
 
     /* Text — warm near-black, not harsh pure black */
     --text-primary: 220 20% 13%;
-    --text-secondary: 220 14% 36%;
-    --text-muted: 220 10% 56%;
+    --text-secondary: 220 14% 34%;
+    --text-muted: 220 10% 40%;
 
     /* Accent — muted sage teal, calm and focused */
     --accent-primary: 168 38% 37%;
@@ -86,7 +86,7 @@
 
     --text-primary: 40 14% 91%;
     --text-secondary: 220 10% 66%;
-    --text-muted: 220 8% 48%;
+    --text-muted: 220 8% 58%;
 
     --accent-primary: 168 32% 52%;
     --accent-hover: 168 32% 58%;

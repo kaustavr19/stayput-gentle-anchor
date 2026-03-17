@@ -65,7 +65,7 @@ export function StartSession({ onStart, continuationContext, microRitual }: Star
       )}
 
       <div className="pt-3">
-        <p className="text-lg text-foreground/75 font-light tracking-tight">
+        <p className="text-lg text-foreground/90 font-light tracking-tight">
           What are you working on?
         </p>
       </div>
@@ -83,7 +83,7 @@ export function StartSession({ onStart, continuationContext, microRitual }: Star
             placeholder="What are you sitting down to do?"
             className={`
               w-full rounded-xl px-5 py-4 text-base text-foreground
-              placeholder:text-muted-foreground/50
+              placeholder:text-muted-foreground/70
               transition-all duration-200
               input-calm
               ${isFocused ? 'shadow-sm' : ''}
@@ -94,7 +94,7 @@ export function StartSession({ onStart, continuationContext, microRitual }: Star
               <p className="text-xs text-muted-foreground">Last time, you were here.</p>
               <button
                 onClick={handleDismissContinuation}
-                className="text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+                className="text-xs text-muted-foreground hover:text-muted-foreground transition-colors"
               >
                 Start fresh
               </button>
@@ -104,7 +104,7 @@ export function StartSession({ onStart, continuationContext, microRitual }: Star
 
         {/* Session mode */}
         <div className="space-y-3">
-          <p className="text-xs text-muted-foreground/70 uppercase tracking-widest px-0.5">
+          <p className="text-xs text-muted-foreground uppercase tracking-widest px-0.5">
             Session type
           </p>
           <div className="grid grid-cols-3 gap-2.5">
@@ -123,7 +123,7 @@ export function StartSession({ onStart, continuationContext, microRitual }: Star
               >
                 <Icon className={`w-4 h-4 ${mode === id ? 'text-primary' : ''}`} />
                 <span className="font-medium text-xs">{label}</span>
-                <span className="text-[10px] opacity-55">{sub}</span>
+                <span className="text-[10px] opacity-75">{sub}</span>
               </button>
             ))}
           </div>
@@ -131,7 +131,7 @@ export function StartSession({ onStart, continuationContext, microRitual }: Star
 
         {/* Context tags */}
         <div className="space-y-3">
-          <p className="text-xs text-muted-foreground/70 uppercase tracking-widest px-0.5">
+          <p className="text-xs text-muted-foreground uppercase tracking-widest px-0.5">
             Context
           </p>
           <div className="flex flex-wrap gap-2">
@@ -166,7 +166,7 @@ export function StartSession({ onStart, continuationContext, microRitual }: Star
           <ArrowRight className="w-4 h-4 ml-1.5 opacity-80" />
         </Button>
 
-        <p className="text-xs text-muted-foreground/50 text-center">
+        <p className="text-xs text-muted-foreground/75 text-center">
           {mode === 'pomodoro'
             ? '25 min focus · 5 min break · repeat'
             : mode === 'deep'

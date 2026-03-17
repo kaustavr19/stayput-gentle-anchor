@@ -179,7 +179,7 @@ export function TaskActivityView({ session, linkedNotes, onBack }: TaskActivityV
                 {event.aiTip && (
                   <p className="text-xs text-text-muted mt-1 italic font-serif">"{event.aiTip}"</p>
                 )}
-                <p className="text-xs text-text-muted/60 mt-0.5 font-sans">
+                <p className="text-xs text-muted-foreground mt-0.5 font-sans">
                   {format(new Date(event.timestamp), 'h:mm a')}
                 </p>
               </div>
@@ -250,7 +250,7 @@ export function TaskActivityView({ session, linkedNotes, onBack }: TaskActivityV
       {/* AI Anecdote — reflective, not instructive */}
       {aiAnecdote && (
         <div className="space-y-3 pt-4 border-t border-border/10">
-          <p className="text-xs text-text-muted/60 font-sans">A thought, not a verdict.</p>
+          <p className="text-xs text-muted-foreground font-sans">A thought, not a verdict.</p>
           <p className="text-sm text-text-secondary font-serif italic leading-relaxed">
             {aiAnecdote}
           </p>

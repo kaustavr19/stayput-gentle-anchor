@@ -25,9 +25,9 @@ export function SessionHistory({ sessions, notes }: SessionHistoryProps) {
       case 'partially':
         return <Pause className="w-3.5 h-3.5 text-amber-600 dark:text-amber-500" />;
       case 'no':
-        return <X className="w-3.5 h-3.5 text-text-muted" />;
+        return <X className="w-3.5 h-3.5 text-muted-foreground" />;
       default:
-        return <Clock className="w-3.5 h-3.5 text-text-muted" />;
+        return <Clock className="w-3.5 h-3.5 text-muted-foreground" />;
     }
   };
 
@@ -88,12 +88,12 @@ export function SessionHistory({ sessions, notes }: SessionHistoryProps) {
       <div className="space-y-8 animate-fade-in">
         <div className="space-y-2">
           <h1 className="text-2xl font-medium text-foreground tracking-tight">History</h1>
-          <p className="text-text-muted text-sm">Your sessions will appear here.</p>
+          <p className="text-muted-foreground text-sm">Your sessions will appear here.</p>
         </div>
 
         <div className="text-center py-16">
-          <p className="text-sm text-text-muted">No sessions yet.</p>
-          <p className="text-xs text-text-muted/60 mt-1">
+          <p className="text-sm text-muted-foreground">No sessions yet.</p>
+          <p className="text-xs text-muted-foreground mt-1">
             Start one when you're ready.
           </p>
         </div>
@@ -105,7 +105,7 @@ export function SessionHistory({ sessions, notes }: SessionHistoryProps) {
     <div className="space-y-8 animate-fade-in">
       <div className="space-y-2">
         <h1 className="text-2xl font-medium text-foreground tracking-tight">History</h1>
-        <p className="text-text-muted text-sm">
+        <p className="text-muted-foreground text-sm">
           A record of where you've been.
         </p>
       </div>
@@ -113,7 +113,7 @@ export function SessionHistory({ sessions, notes }: SessionHistoryProps) {
       <div className="space-y-8">
         {Object.entries(groupedSessions).map(([date, daySessions]) => (
           <div key={date} className="space-y-3">
-            <p className="text-xs text-text-muted uppercase tracking-widest">
+            <p className="text-xs text-muted-foreground uppercase tracking-widest">
               {date}
             </p>
             
@@ -137,11 +137,11 @@ export function SessionHistory({ sessions, notes }: SessionHistoryProps) {
                     
                     <div className="flex items-center gap-2 mt-1">
                       {session.context && (
-                        <span className="text-xs text-text-muted">
+                        <span className="text-xs text-muted-foreground">
                           {session.context}
                         </span>
                       )}
-                      <span className="text-xs text-text-muted/60">
+                      <span className="text-xs text-muted-foreground">
                         {getStatusLabel(session)}
                       </span>
                     </div>
@@ -159,11 +159,11 @@ export function SessionHistory({ sessions, notes }: SessionHistoryProps) {
                       <p className="text-sm text-text-secondary tabular-nums">
                         {getDuration(session)}
                       </p>
-                      <p className="text-xs text-text-muted/70 mt-0.5">
+                      <p className="text-xs text-muted-foreground/70 mt-0.5">
                         {format(new Date(session.endedAt!), 'h:mm a')}
                       </p>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-text-muted/40 group-hover:text-text-muted transition-colors" />
+                    <ChevronRight className="w-4 h-4 text-muted-foreground/70 group-hover:text-muted-foreground transition-colors" />
                   </div>
                 </button>
               ))}

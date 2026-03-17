@@ -113,7 +113,7 @@ export function Analytics({ sessions }: AnalyticsProps) {
         </div>
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <p className="text-muted-foreground text-sm">No sessions yet.</p>
-          <p className="text-muted-foreground/60 text-xs mt-1">Complete a focus session to see your data.</p>
+          <p className="text-muted-foreground text-xs mt-1">Complete a focus session to see your data.</p>
         </div>
       </div>
     );

@@ -83,7 +83,7 @@ export function DistractionPrompt({ taskName, onSubmit, onSkip }: DistractionPro
         <p className="text-sm text-text-secondary font-serif italic leading-relaxed">
           "{aiTip}"
         </p>
-        <p className="text-xs text-text-muted/60 mt-3">Returning to session...</p>
+        <p className="text-xs text-muted-foreground mt-3">Returning to session...</p>
       </div>
     );
   }
@@ -92,7 +92,7 @@ export function DistractionPrompt({ taskName, onSubmit, onSkip }: DistractionPro
   if (isLoading) {
     return (
       <div className="bg-card/40 backdrop-blur-sm rounded-xl p-6 border border-border/10 animate-fade-in flex justify-center">
-        <Loader2 className="w-5 h-5 animate-spin text-text-muted" />
+        <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -103,7 +103,7 @@ export function DistractionPrompt({ taskName, onSubmit, onSkip }: DistractionPro
         <p className="text-sm text-text-secondary">What pulled you away?</p>
         <button
           onClick={onSkip}
-          className="text-text-muted/50 hover:text-text-muted transition-colors"
+          className="text-muted-foreground/70 hover:text-muted-foreground transition-colors"
         >
           <X className="w-4 h-4" />
         </button>
@@ -117,14 +117,14 @@ export function DistractionPrompt({ taskName, onSubmit, onSkip }: DistractionPro
             onChange={(e) => setCustomCause(e.target.value)}
             placeholder="What distracted you?"
             autoFocus
-            className="w-full bg-surface/50 border border-border/20 rounded-lg px-4 py-2 text-sm text-foreground placeholder:text-text-muted/50 focus:outline-none focus:border-border/40"
+            className="w-full bg-surface/50 border border-border/20 rounded-lg px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:border-border/40"
           />
           <div className="flex gap-2">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setSelected(null)}
-              className="text-text-muted"
+              className="text-muted-foreground"
             >
               Back
             </Button>
@@ -142,14 +142,14 @@ export function DistractionPrompt({ taskName, onSubmit, onSkip }: DistractionPro
             <button
               key={value}
               onClick={() => handleSelect(value)}
-              className="px-4 py-2 rounded-full text-sm transition-all bg-transparent text-text-muted border border-border/20 hover:border-border/40 hover:text-text-secondary"
+              className="px-4 py-2 rounded-full text-sm transition-all bg-transparent text-muted-foreground border border-border/20 hover:border-border/40 hover:text-text-secondary"
             >
               {label}
             </button>
           ))}
           <button
             onClick={onSkip}
-            className="px-4 py-2 rounded-full text-sm transition-all text-text-muted/60 border border-border/10 hover:border-border/30"
+            className="px-4 py-2 rounded-full text-sm transition-all text-muted-foreground border border-border/10 hover:border-border/30"
           >
             Skip
           </button>
