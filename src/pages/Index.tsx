@@ -98,7 +98,7 @@ const Index = () => {
               onPause={pauseSession}
               onResume={resumeSession}
               onDistraction={logDistraction}
-              onStartBreak={startBreak}
+              onStartBreak={(mins) => startBreak(mins)}
               onSkipBreak={skipBreak}
               tinyWinMessage={tinyWinMessage}
             />
@@ -106,7 +106,7 @@ const Index = () => {
         }
         return (
           <StartSession
-            onStart={startSession}
+            onStart={(task, ctx, mode, customDuration) => startSession(task, ctx, mode, customDuration)}
             continuationContext={continuationContext}
             microRitual={microRitual}
           />

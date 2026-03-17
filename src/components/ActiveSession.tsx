@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { playDing, playCompletionTune } from '@/lib/sounds';
 import { FocusSession, PauseReason, DistractionCause } from '@/types';
 import { FocusTimer } from './FocusTimer';
 import { PauseReasonPrompt } from './PauseReasonPrompt';
@@ -17,7 +18,7 @@ interface ActiveSessionProps {
   onPause: (reason?: PauseReason, customReason?: string) => void;
   onResume: () => void;
   onDistraction: (cause?: DistractionCause, customCause?: string, aiTip?: string) => void;
-  onStartBreak?: () => void;
+  onStartBreak?: (durationMinutes?: number) => void;
   onSkipBreak?: () => void;
   tinyWinMessage?: string | null;
 }
@@ -40,8 +41,35 @@ export function ActiveSession({
   onSkipBreak,
   tinyWinMessage,
 }: ActiveSessionProps) {
-  // Auto-prompt break when Pomodoro timer completes
+  // Auto-prompt break when Pomodoro/Deep timer completes
   const isTimerComplete = !!session.targetDuration && elapsedTime >= session.targetDuration && !isInBreak;
+  const [timerCompleteDismissed, setTimerCompleteDismissed] = useState(false);
+  const showTimerCompletePrompt = isTimerComplete && !timerCompleteDismissed;
+
+  // 30-min milestone tracking for open mode
+  const lastMilestone = useRef(0);
+  const completionSoundPlayed = useRef(false);
+  const [showMilestoneBreak, setShowMilestoneBreak] = useState(false);
+
+  // Ding every 30 min during open mode
+  useEffect(() => {
+    if (session.sessionMode !== 'open' || isPaused || isInBreak) return;
+    const milestone = Math.floor(elapsedTime / 1800);
+    if (milestone > 0 && milestone > lastMilestone.current) {
+      lastMilestone.current = milestone;
+      playDing();
+      setShowMilestoneBreak(true);
+    }
+  }, [elapsedTime, session.sessionMode, isPaused, isInBreak]);
+
+  // Completion tune for Pomodoro / Deep Work
+  useEffect(() => {
+    if (isTimerComplete && !completionSoundPlayed.current) {
+      completionSoundPlayed.current = true;
+      playCompletionTune();
+    }
+  }, [isTimerComplete]);
+
   const [showReflection, setShowReflection] = useState(false);
   const [completed, setCompleted] = useState<CompletionState>(null);
   const [stopReason, setStopReason] = useState<StopReason | null>(null);
@@ -258,15 +286,43 @@ export function ActiveSession({
         />
       </div>
 
-      {/* Pomodoro complete prompt */}
-      {isTimerComplete && !isInBreak && (
-        <div className="rounded-xl border border-primary/20 bg-primary/[0.05] p-4 space-y-3 animate-fade-in">
-          <p className="text-sm text-foreground font-medium">25 minutes done. Time for a break?</p>
+      {/* Timer complete prompt (Pomodoro / Deep Work) */}
+      {showTimerCompletePrompt && !isInBreak && (() => {
+        const isDeep = session.sessionMode === 'deep';
+        const isCustom = session.sessionMode === 'custom';
+        const label = isDeep
+          ? '90 minutes done — time to recharge.'
+          : isCustom
+          ? "Time's up — great work. Take a break?"
+          : '25 minutes done — take a short break?';
+        const breakMins = isDeep ? 20 : 5;
+        const breakLabel = isDeep ? 'Take 20 min break' : 'Take 5 min break';
+        return (
+          <div className="rounded-xl border border-primary/20 bg-primary/[0.05] p-4 space-y-3 animate-fade-in">
+            <p className="text-sm text-foreground font-medium">{label}</p>
+            <div className="flex gap-2">
+              <Button size="sm" onClick={() => { setTimerCompleteDismissed(true); onStartBreak?.(breakMins); }} className="btn-sage text-xs rounded-lg h-8 px-4">
+                {breakLabel}
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => { setTimerCompleteDismissed(true); onSkipBreak?.(); }} className="text-muted-foreground text-xs h-8 px-3">
+                Keep going
+              </Button>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* 30-min open-mode milestone toast */}
+      {showMilestoneBreak && !isInBreak && (
+        <div className="rounded-xl border border-border/40 bg-muted/40 p-4 space-y-3 animate-fade-in">
+          <p className="text-sm text-foreground font-medium">
+            {Math.floor(elapsedTime / 1800) * 30} min elapsed — consider a short break.
+          </p>
           <div className="flex gap-2">
-            <Button size="sm" onClick={onStartBreak} className="btn-sage text-xs rounded-lg h-8 px-4">
-              Take 5 min break
+            <Button size="sm" onClick={() => { setShowMilestoneBreak(false); onStartBreak?.(5); }} className="btn-sage text-xs rounded-lg h-8 px-4">
+              Pause &amp; rest 5 min
             </Button>
-            <Button size="sm" variant="ghost" onClick={onSkipBreak} className="text-muted-foreground text-xs h-8 px-3">
+            <Button size="sm" variant="ghost" onClick={() => setShowMilestoneBreak(false)} className="text-muted-foreground text-xs h-8 px-3">
               Keep going
             </Button>
           </div>

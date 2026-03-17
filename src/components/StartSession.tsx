@@ -1,10 +1,10 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Timer, Brain, Zap } from 'lucide-react';
+import { ArrowRight, Timer, Brain, Zap, SlidersHorizontal } from 'lucide-react';
 import { SessionMode } from '@/types';
 
 interface StartSessionProps {
-  onStart: (taskName: string, context?: string, mode?: SessionMode) => void;
+  onStart: (taskName: string, context?: string, mode?: SessionMode, customDuration?: number) => void;
   continuationContext?: {
     taskName: string;
     context?: string;
@@ -18,13 +18,16 @@ const contextOptions = ['designing', 'writing', 'coding', 'thinking', 'planning'
 const sessionModes: { id: SessionMode; label: string; sub: string; icon: typeof Timer }[] = [
   { id: 'open',     label: 'Open',     sub: 'No timer',  icon: Zap },
   { id: 'pomodoro', label: 'Pomodoro', sub: '25 min',    icon: Timer },
-  { id: 'deep',     label: 'Deep',     sub: '90 min',    icon: Brain },
+  { id: 'deep',     label: 'Deep Work', sub: '90 min',   icon: Brain },
+  { id: 'custom',   label: 'Custom',   sub: 'Set time',  icon: SlidersHorizontal },
 ];
 
 export function StartSession({ onStart, continuationContext, microRitual }: StartSessionProps) {
   const [taskName, setTaskName] = useState('');
   const [context, setContext] = useState<string | undefined>();
   const [mode, setMode] = useState<SessionMode>('open');
+  const [customHours, setCustomHours] = useState(0);
+  const [customMinutes, setCustomMinutes] = useState(45);
   const [isFocused, setIsFocused] = useState(false);
   const [showContinuation, setShowContinuation] = useState(true);
 
@@ -35,14 +38,20 @@ export function StartSession({ onStart, continuationContext, microRitual }: Star
     }
   }, [continuationContext, showContinuation]);
 
+  const customDurationSeconds = (customHours * 3600) + (customMinutes * 60);
+  const customIsValid = mode !== 'custom' || customDurationSeconds > 0;
+
   const handleStart = useCallback(() => {
-    if (!taskName.trim()) return;
-    onStart(taskName.trim(), context, mode);
+    if (!taskName.trim() || !customIsValid) return;
+    const duration = mode === 'custom' ? customDurationSeconds : undefined;
+    onStart(taskName.trim(), context, mode, duration);
     setTaskName('');
     setContext(undefined);
     setMode('open');
+    setCustomHours(0);
+    setCustomMinutes(45);
     setShowContinuation(false);
-  }, [taskName, context, mode, onStart]);
+  }, [taskName, context, mode, customDurationSeconds, customIsValid, onStart]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && taskName.trim()) handleStart();
@@ -107,7 +116,7 @@ export function StartSession({ onStart, continuationContext, microRitual }: Star
           <p className="text-xs text-muted-foreground uppercase tracking-widest px-0.5">
             Session type
           </p>
-          <div className="grid grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             {sessionModes.map(({ id, label, sub, icon: Icon }) => (
               <button
                 key={id}
@@ -123,10 +132,45 @@ export function StartSession({ onStart, continuationContext, microRitual }: Star
               >
                 <Icon className={`w-4 h-4 ${mode === id ? 'text-primary' : ''}`} />
                 <span className="font-medium text-xs">{label}</span>
-                <span className="text-[10px] opacity-75">{sub}</span>
+                <span className="text-[10px] opacity-75">
+                  {id === 'custom' && mode === 'custom' && customDurationSeconds > 0
+                    ? `${customHours > 0 ? `${customHours}h ` : ''}${customMinutes > 0 ? `${customMinutes}m` : ''}`.trim()
+                    : sub}
+                </span>
               </button>
             ))}
           </div>
+
+          {/* Custom duration picker */}
+          {mode === 'custom' && (
+            <div className="flex items-center gap-3 pt-1 animate-fade-in">
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="number"
+                  min={0}
+                  max={23}
+                  value={customHours}
+                  onChange={(e) => setCustomHours(Math.max(0, Math.min(23, parseInt(e.target.value) || 0)))}
+                  className="w-14 text-center rounded-lg px-2 py-2 text-sm text-foreground bg-card/60 border border-border/40 focus:outline-none focus:border-primary/40 tabular-nums"
+                />
+                <span className="text-xs text-muted-foreground">hr</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="number"
+                  min={0}
+                  max={59}
+                  value={customMinutes}
+                  onChange={(e) => setCustomMinutes(Math.max(0, Math.min(59, parseInt(e.target.value) || 0)))}
+                  className="w-14 text-center rounded-lg px-2 py-2 text-sm text-foreground bg-card/60 border border-border/40 focus:outline-none focus:border-primary/40 tabular-nums"
+                />
+                <span className="text-xs text-muted-foreground">min</span>
+              </div>
+              {customDurationSeconds === 0 && (
+                <span className="text-xs text-muted-foreground/60">Set a duration above zero</span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Context tags */}
@@ -158,7 +202,7 @@ export function StartSession({ onStart, continuationContext, microRitual }: Star
       <div className="space-y-3 pt-2">
         <Button
           onClick={handleStart}
-          disabled={!taskName.trim()}
+          disabled={!taskName.trim() || !customIsValid}
           size="lg"
           className="w-full btn-sage rounded-xl h-12 text-sm font-medium"
         >
@@ -171,6 +215,8 @@ export function StartSession({ onStart, continuationContext, microRitual }: Star
             ? '25 min focus · 5 min break · repeat'
             : mode === 'deep'
             ? '90 minutes of uninterrupted flow'
+            : mode === 'custom' && customDurationSeconds > 0
+            ? `${customHours > 0 ? `${customHours}h ` : ''}${customMinutes > 0 ? `${customMinutes}m` : ''} focus · tone plays when time is up`.trim()
             : 'No timers. No pressure. Just you and the work.'}
         </p>
       </div>

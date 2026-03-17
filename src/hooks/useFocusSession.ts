@@ -11,7 +11,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from './useAuth';
-import { updateLeaderboard } from './useLeaderboard';
+import { updateLeaderboard, backfillLeaderboard } from './useLeaderboard';
 
 // ─── Conversion helpers ────────────────────────────────────────────────────
 
@@ -73,6 +73,7 @@ const SESSION_DURATIONS: Record<SessionMode, number | undefined> = {
   open:     undefined,
   pomodoro: 25 * 60,
   deep:     90 * 60,
+  custom:   undefined, // duration supplied at call time
 };
 
 // ─── Hook ─────────────────────────────────────────────────────────────────
@@ -110,6 +111,13 @@ export function useFocusSession() {
         setSessions(mapped);
         const active = mapped.find(s => !s.endedAt);
         if (active) setActiveSession(active);
+        // Backfill leaderboard from all historical sessions so existing users appear
+        if (user && mapped.some(s => s.endedAt)) {
+          const displayName = user.displayName ?? user.email?.split('@')[0] ?? 'Anonymous';
+          backfillLeaderboard(user.uid, displayName, user.photoURL ?? null, mapped).catch(
+            err => console.error('[StayPut] Leaderboard backfill failed', err),
+          );
+        }
       } finally {
         setIsLoading(false);
       }
@@ -166,14 +174,14 @@ export function useFocusSession() {
   }, [user, sessionDoc]);
 
   // ── startSession ──────────────────────────────────────────────────────
-  const startSession = useCallback(async (taskName: string, context?: string, mode: SessionMode = 'open') => {
+  const startSession = useCallback(async (taskName: string, context?: string, mode: SessionMode = 'open', customDuration?: number) => {
     const now = new Date();
     const newSession: FocusSession = {
       id: crypto.randomUUID(),
       taskName,
       context,
       sessionMode: mode,
-      targetDuration: SESSION_DURATIONS[mode],
+      targetDuration: mode === 'custom' ? customDuration : SESSION_DURATIONS[mode],
       startedAt: now,
       activities: [{ id: crypto.randomUUID(), type: 'session_started', timestamp: now }],
     };
@@ -250,7 +258,7 @@ export function useFocusSession() {
   }, [activeSession, addActivity, syncSession, user]);
 
   // ── Pomodoro break controls ───────────────────────────────────────────
-  const startBreak = useCallback(() => { setIsInBreak(true); setBreakTimeLeft(5 * 60); }, []);
+  const startBreak = useCallback((durationMinutes = 5) => { setIsInBreak(true); setBreakTimeLeft(durationMinutes * 60); }, []);
   const skipBreak  = useCallback(() => { setIsInBreak(false); setBreakTimeLeft(5 * 60); }, []);
 
   const formatTime = useCallback((seconds: number) => {
