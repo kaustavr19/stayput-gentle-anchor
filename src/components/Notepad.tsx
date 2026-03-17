@@ -55,7 +55,7 @@ export function Notepad({
       <div className="flex items-center justify-between mb-5">
         <div>
           <h3 className="text-sm font-medium text-foreground">Parking lot</h3>
-          <p className="text-xs text-text-muted mt-0.5">
+          <p className="text-xs text-muted-foreground mt-0.5">
             {filter === 'parked' ? `${parkedCount} parked` : 'Park your thoughts'}
           </p>
         </div>
@@ -66,8 +66,8 @@ export function Notepad({
               className={`
                 px-2 py-1 text-xs rounded transition-colors
                 ${filter === 'parked' 
-                  ? 'bg-foreground/10 text-foreground' 
-                  : 'text-text-muted hover:text-text-secondary'
+                  ? 'bg-foreground/10 text-foreground'
+                  : 'text-muted-foreground hover:text-text-secondary'
                 }
               `}
             >
@@ -90,14 +90,14 @@ export function Notepad({
       {/* Parked suggestion from AI — V1.1 */}
       {parkedSuggestion && (
         <div className="mb-4 p-3 bg-surface/30 border border-border/10 rounded-lg animate-fade-in">
-          <p className="text-xs text-text-muted mb-2">
+          <p className="text-xs text-muted-foreground mb-2">
             You parked this thought earlier. Want to bring it back?
           </p>
           <p className="text-sm text-text-secondary italic">"{parkedSuggestion}"</p>
           <div className="flex gap-2 mt-3">
             <button
               onClick={onDismissParkedSuggestion}
-              className="text-xs text-text-muted hover:text-text-secondary transition-colors"
+              className="text-xs text-muted-foreground hover:text-text-secondary transition-colors"
             >
               Not now
             </button>
@@ -115,7 +115,7 @@ export function Notepad({
             placeholder="Dump a thought..."
             rows={3}
             autoFocus
-            className="w-full bg-card/60 border border-border/20 rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-text-muted/60 focus:outline-none focus:border-primary/30 resize-none"
+            className="w-full bg-card/60 border border-border/20 rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:border-primary/30 resize-none"
           />
           <div className="flex justify-end gap-2 mt-3">
             <Button
@@ -143,10 +143,10 @@ export function Notepad({
       <div className="flex-1 overflow-y-auto space-y-3 min-h-0">
         {filteredNotes.length === 0 ? (
           <div className="text-center py-10">
-            <p className="text-sm text-text-muted">
+            <p className="text-sm text-muted-foreground">
               {filter === 'parked' ? 'No parked thoughts.' : 'No thoughts yet.'}
             </p>
-            <p className="text-xs text-text-muted/60 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               {filter === 'parked' ? 'Park thoughts to save for later.' : "That's probably fine."}
             </p>
           </div>
@@ -174,7 +174,7 @@ export function Notepad({
                         p-1 transition-colors
                         ${note.isParked 
                           ? 'text-primary hover:text-primary/80' 
-                          : 'text-text-muted hover:text-text-secondary'
+                          : 'text-muted-foreground hover:text-text-secondary'
                         }
                       `}
                       title={note.isParked ? 'Unpark' : 'Park for later'}
@@ -184,7 +184,7 @@ export function Notepad({
                   )}
                   <button
                     onClick={() => onDelete(note.id)}
-                    className="text-text-muted hover:text-destructive transition-all p-1"
+                    className="text-muted-foreground hover:text-destructive transition-all p-1"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -194,7 +194,7 @@ export function Notepad({
                 {note.isParked && (
                   <span className="text-xs text-primary/70">parked</span>
                 )}
-                <p className="text-xs text-text-muted/70">
+                <p className="text-xs text-muted-foreground">
                   {format(new Date(note.createdAt), 'MMM d, h:mm a')}
                 </p>
               </div>

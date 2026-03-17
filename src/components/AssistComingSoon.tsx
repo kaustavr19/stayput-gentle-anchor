@@ -33,7 +33,7 @@ export function AssistComingSoon() {
           </p>
         </div>
 
-        <p className="text-xs text-muted-foreground/50 font-serif italic">
+        <p className="text-xs text-muted-foreground/75 font-serif italic">
           Being thoughtfully built.
         </p>
       </div>

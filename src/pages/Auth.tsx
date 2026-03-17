@@ -178,7 +178,7 @@ const Auth = () => {
           </div>
 
           {/* Mantra */}
-          <p className="text-center text-xs text-muted-foreground/50 font-serif italic mt-5">
+          <p className="text-center text-xs text-muted-foreground/75 font-serif italic mt-5">
             Stay present. Stay put.
           </p>
         </div>

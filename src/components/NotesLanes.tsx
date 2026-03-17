@@ -47,13 +47,13 @@ const NoteCard = memo(({ note, colorIndex, onSelect, onToggleParked, onRequestDe
     </p>
     
     {note.details && (
-      <p className="text-xs text-text-muted mt-2 truncate">
+      <p className="text-xs text-muted-foreground mt-2 truncate">
         + more details
       </p>
     )}
     
     <div className="flex items-center justify-between mt-3">
-      <p className="text-xs text-text-muted/60">
+      <p className="text-xs text-muted-foreground">
         {format(new Date(note.createdAt), 'MMM d')}
       </p>
       
@@ -65,7 +65,7 @@ const NoteCard = memo(({ note, colorIndex, onSelect, onToggleParked, onRequestDe
         {onToggleParked && (
           <button
             onClick={() => onToggleParked(note.id)}
-            className="flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors p-1.5 rounded-md hover:bg-foreground/5"
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-text-secondary transition-colors p-1.5 rounded-md hover:bg-foreground/5"
             title={note.isParked ? 'Bring back' : 'Park for later'}
           >
             {note.isParked ? (
@@ -83,7 +83,7 @@ const NoteCard = memo(({ note, colorIndex, onSelect, onToggleParked, onRequestDe
         )}
         <button
           onClick={() => onRequestDelete(note.id)}
-          className="flex items-center gap-1 text-xs text-text-muted hover:text-destructive transition-colors p-1.5 rounded-md hover:bg-foreground/5"
+          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-colors p-1.5 rounded-md hover:bg-foreground/5"
         >
           <Trash2 className="w-3 h-3" />
         </button>
@@ -93,7 +93,7 @@ const NoteCard = memo(({ note, colorIndex, onSelect, onToggleParked, onRequestDe
       <div className="md:hidden" onClick={(e) => e.stopPropagation()}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="p-1 text-text-muted hover:text-text-secondary transition-colors">
+            <button className="p-1 text-muted-foreground hover:text-text-secondary transition-colors">
               <MoreHorizontal className="w-4 h-4" />
             </button>
           </DropdownMenuTrigger>
@@ -227,7 +227,7 @@ export function NotesLanes({
       <div className="flex items-center justify-between mb-6 shrink-0">
         <div>
           <h2 className="text-lg font-serif text-foreground">Notes</h2>
-          <p className="text-xs text-text-muted mt-0.5">Now and later</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Now and later</p>
         </div>
         {!isAdding && (
           <Button
@@ -244,13 +244,13 @@ export function NotesLanes({
       {/* Parked suggestion from AI */}
       {parkedSuggestion && (
         <div className="mb-5 p-4 bg-pastel-lavender rounded-xl animate-fade-in shrink-0">
-          <p className="text-xs text-text-muted mb-2">
+          <p className="text-xs text-muted-foreground mb-2">
             You parked this thought earlier. Want to bring it back?
           </p>
           <p className="text-sm text-foreground/80 italic">"{parkedSuggestion}"</p>
           <button
             onClick={onDismissParkedSuggestion}
-            className="text-xs text-text-muted hover:text-text-secondary transition-colors mt-3"
+            className="text-xs text-muted-foreground hover:text-text-secondary transition-colors mt-3"
           >
             Not now
           </button>
@@ -267,7 +267,7 @@ export function NotesLanes({
             placeholder="Dump a thought..."
             rows={2}
             autoFocus
-            className="w-full bg-card border border-border/20 rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-text-muted/60 focus:outline-none focus:border-primary/30 resize-none"
+            className="w-full bg-card border border-border/20 rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:border-primary/30 resize-none"
           />
           <div className="flex justify-end gap-2 mt-2">
             <Button
@@ -295,10 +295,10 @@ export function NotesLanes({
       <div className="flex-1 min-h-0 grid grid-cols-2 gap-6 overflow-hidden">
         {/* NOW lane */}
         <div className="flex flex-col min-h-0">
-          <p className="text-xs text-text-muted/70 uppercase tracking-wider mb-4 shrink-0">Now</p>
+          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-4 shrink-0">Now</p>
           <div className="flex-1 overflow-y-auto space-y-3 pr-2">
             {activeNotes.length === 0 ? (
-              <p className="text-xs text-text-muted/50 py-8 text-center">
+              <p className="text-xs text-muted-foreground py-8 text-center">
                 Clear for now.
               </p>
             ) : (
@@ -318,10 +318,10 @@ export function NotesLanes({
 
         {/* LATER lane */}
         <div className="flex flex-col min-h-0">
-          <p className="text-xs text-text-muted/70 uppercase tracking-wider mb-4 shrink-0">Later</p>
+          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-4 shrink-0">Later</p>
           <div className="flex-1 overflow-y-auto space-y-3 pl-2">
             {parkedNotes.length === 0 ? (
-              <p className="text-xs text-text-muted/50 py-8 text-center">
+              <p className="text-xs text-muted-foreground py-8 text-center">
                 Nothing parked.
               </p>
             ) : (

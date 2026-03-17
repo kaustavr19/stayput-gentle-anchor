@@ -33,7 +33,7 @@ export function Layout({ children, activeTab, onTabChange, sideContent }: Layout
     <div className="min-h-screen flex flex-col">
       {/* Header — frosted glass, barely-there */}
       <header className="sticky top-0 z-40 px-4 py-3">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between rounded-2xl px-4 py-2.5 glass border border-border/60 shadow-[0_1px_3px_hsl(220_20%_13%/0.06),0_4px_16px_hsl(220_20%_13%/0.05)]">
             {/* Logo */}
             <Logo />
@@ -104,7 +104,7 @@ export function Layout({ children, activeTab, onTabChange, sideContent }: Layout
 
       {/* Main content */}
       <main className="flex-1 flex px-4 py-5">
-        <div className="flex-1 max-w-6xl mx-auto flex gap-6">
+        <div className="flex-1 max-w-7xl mx-auto flex gap-6">
           {/* Primary panel */}
           <div className="flex-1 min-w-0">
             <div className="card-depth rounded-2xl p-6 min-h-[68vh] animate-fade-in">
@@ -114,7 +114,7 @@ export function Layout({ children, activeTab, onTabChange, sideContent }: Layout
 
           {/* Sidebar (notepad on focus view) */}
           {sideContent && (
-            <aside className="hidden lg:block w-68 shrink-0">
+            <aside className="hidden lg:block w-80 shrink-0">
               <div className="sticky top-20 card-surface rounded-2xl p-5 h-[calc(100vh-8.5rem)] overflow-hidden">
                 {sideContent}
               </div>
@@ -125,8 +125,8 @@ export function Layout({ children, activeTab, onTabChange, sideContent }: Layout
 
       {/* Footer mantra */}
       <footer className="px-4 py-4">
-        <div className="max-w-6xl mx-auto">
-          <p className="text-xs text-muted-foreground/40 text-center font-serif italic tracking-wide">
+        <div className="max-w-7xl mx-auto">
+          <p className="text-xs text-muted-foreground/70 text-center font-serif italic tracking-wide">
             Stay present. Stay put.
           </p>
         </div>

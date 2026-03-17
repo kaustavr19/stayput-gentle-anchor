@@ -84,7 +84,7 @@ export function AIAssist({ onStartSession, recentContext }: AIAssistProps) {
             onChange={(e) => setIntention(e.target.value)}
             placeholder="e.g., I want to work on my portfolio"
             rows={3}
-            className="w-full bg-card/40 backdrop-blur-sm border border-border/20 rounded-xl px-6 py-5 text-foreground placeholder:text-text-muted/50 focus:outline-none focus:border-border/40 focus:bg-card/60 resize-none transition-all duration-300"
+            className="w-full bg-card/40 backdrop-blur-sm border border-border/20 rounded-xl px-6 py-5 text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:border-border/40 focus:bg-card/60 resize-none transition-all duration-300"
           />
           
           <Button
@@ -100,14 +100,14 @@ export function AIAssist({ onStartSession, recentContext }: AIAssistProps) {
       ) : isLoading ? (
         /* Loading state */
         <div className="text-center py-16">
-          <Loader2 className="w-5 h-5 text-text-muted animate-spin mx-auto mb-4" />
+          <Loader2 className="w-5 h-5 text-muted-foreground animate-spin mx-auto mb-4" />
           <p className="text-sm text-text-muted/70">Thinking...</p>
         </div>
       ) : (
         /* Results — margin note feel */
         <div className="space-y-8">
           <div className="bg-card/30 backdrop-blur-sm rounded-xl p-5 border border-border/10">
-            <p className="text-xs text-text-muted/70 uppercase tracking-widest mb-2">For</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-widest mb-2">For</p>
             <p className="text-foreground">"{intention}"</p>
           </div>
 
@@ -131,7 +131,7 @@ export function AIAssist({ onStartSession, recentContext }: AIAssistProps) {
           <Button
             variant="ghost"
             onClick={handleReset}
-            className="w-full text-text-muted hover:text-text-secondary"
+            className="w-full text-muted-foreground hover:text-text-secondary"
           >
             Try something else
           </Button>
@@ -139,7 +139,7 @@ export function AIAssist({ onStartSession, recentContext }: AIAssistProps) {
       )}
 
       {/* Ambient note */}
-      <p className="text-sm text-text-muted/50 text-center font-serif italic pt-6">
+      <p className="text-sm text-muted-foreground text-center font-serif italic pt-6">
         Small steps. That's the whole secret.
       </p>
     </div>

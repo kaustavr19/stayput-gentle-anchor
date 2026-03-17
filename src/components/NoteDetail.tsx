@@ -74,7 +74,7 @@ export function NoteDetail({
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 text-sm text-text-muted hover:text-text-secondary transition-colors"
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-text-secondary transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Back
@@ -91,7 +91,7 @@ export function NoteDetail({
       <div className="flex-1 space-y-6 overflow-y-auto">
         {/* Main content */}
         <div className="space-y-2">
-          <label className="text-xs text-text-muted uppercase tracking-wider">
+          <label className="text-xs text-muted-foreground uppercase tracking-wider">
             Note
           </label>
           <textarea
@@ -104,13 +104,13 @@ export function NoteDetail({
 
         {/* Details section */}
         <div className="space-y-2">
-          <label className="text-xs text-text-muted uppercase tracking-wider">
+          <label className="text-xs text-muted-foreground uppercase tracking-wider">
             More thoughts
           </label>
           <textarea
             value={details}
             onChange={(e) => handleDetailsChange(e.target.value)}
-            className="w-full bg-card/30 border border-border/10 rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-text-muted/60 focus:outline-none focus:border-primary/30 resize-none min-h-[150px]"
+            className="w-full bg-card/30 border border-border/10 rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:border-primary/30 resize-none min-h-[150px]"
             placeholder="Expand on this thought..."
           />
         </div>
@@ -118,11 +118,11 @@ export function NoteDetail({
         {/* Bucket control */}
         {onToggleParked && (
           <div className="space-y-2">
-            <label className="text-xs text-text-muted uppercase tracking-wider">
+            <label className="text-xs text-muted-foreground uppercase tracking-wider">
               Bucket
             </label>
             <div className="flex items-center gap-3">
-              <span className={`text-sm ${note.isParked ? 'text-text-muted' : 'text-foreground font-medium'}`}>
+              <span className={`text-sm ${note.isParked ? 'text-muted-foreground' : 'text-foreground font-medium'}`}>
                 {note.isParked ? 'Later' : 'Now'}
               </span>
               <button
@@ -138,7 +138,7 @@ export function NoteDetail({
 
         {/* Linked session */}
         <div className="space-y-2">
-          <label className="text-xs text-text-muted uppercase tracking-wider">
+          <label className="text-xs text-muted-foreground uppercase tracking-wider">
             Linked session
           </label>
           
@@ -154,7 +154,7 @@ export function NoteDetail({
               {onLinkSession && (
                 <button
                   onClick={handleUnlinkSession}
-                  className="text-text-muted hover:text-text-secondary transition-colors p-1"
+                  className="text-muted-foreground hover:text-text-secondary transition-colors p-1"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -163,16 +163,16 @@ export function NoteDetail({
           ) : showSessionPicker ? (
             <div className="bg-card/30 border border-border/10 rounded-lg p-3 space-y-2">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-text-muted">Select a session</span>
+                <span className="text-xs text-muted-foreground">Select a session</span>
                 <button
                   onClick={() => setShowSessionPicker(false)}
-                  className="text-text-muted hover:text-text-secondary transition-colors p-1"
+                  className="text-muted-foreground hover:text-text-secondary transition-colors p-1"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
               </div>
               {recentSessions.length === 0 ? (
-                <p className="text-xs text-text-muted/60 py-2">No completed sessions yet.</p>
+                <p className="text-xs text-muted-foreground py-2">No completed sessions yet.</p>
               ) : (
                 <div className="max-h-[200px] overflow-y-auto space-y-1">
                   {recentSessions.map(session => (
@@ -182,7 +182,7 @@ export function NoteDetail({
                       className="w-full text-left px-3 py-2 rounded-md text-sm text-text-secondary hover:bg-surface/50 transition-colors"
                     >
                       <span className="block truncate">{session.taskName}</span>
-                      <span className="text-xs text-text-muted">
+                      <span className="text-xs text-muted-foreground">
                         {format(new Date(session.startedAt), 'MMM d')}
                       </span>
                     </button>
@@ -193,7 +193,7 @@ export function NoteDetail({
           ) : onLinkSession ? (
             <button
               onClick={() => setShowSessionPicker(true)}
-              className="flex items-center gap-2 text-sm text-text-muted hover:text-text-secondary transition-colors"
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-text-secondary transition-colors"
             >
               <Link2 className="w-3.5 h-3.5" />
               Link to a session
@@ -203,11 +203,11 @@ export function NoteDetail({
 
         {/* Metadata */}
         <div className="space-y-2 pt-4 border-t border-border/10">
-          <p className="text-xs text-text-muted">
+          <p className="text-xs text-muted-foreground">
             Created {format(new Date(note.createdAt), 'MMM d, yyyy · h:mm a')}
           </p>
           {note.updatedAt && new Date(note.updatedAt).getTime() !== new Date(note.createdAt).getTime() && (
-            <p className="text-xs text-text-muted/60">
+            <p className="text-xs text-muted-foreground">
               Updated {format(new Date(note.updatedAt), 'MMM d, yyyy · h:mm a')}
             </p>
           )}

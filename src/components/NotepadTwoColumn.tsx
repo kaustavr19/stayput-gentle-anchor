@@ -34,12 +34,12 @@ const NoteCard = memo(({ note, onSelect, onToggleParked, onRequestDelete }: Note
       {note.content}
     </p>
     {note.details && (
-      <p className="text-xs text-text-muted/70 mt-1 line-clamp-1">
+      <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
         {note.details}
       </p>
     )}
     <div className="flex items-center justify-between mt-2">
-      <p className="text-xs text-text-muted/60">
+      <p className="text-xs text-muted-foreground">
         {format(new Date(note.createdAt), 'MMM d')}
       </p>
       
@@ -51,7 +51,7 @@ const NoteCard = memo(({ note, onSelect, onToggleParked, onRequestDelete }: Note
         {onToggleParked && (
           <button
             onClick={() => onToggleParked(note.id)}
-            className="flex items-center gap-1 text-xs text-text-muted hover:text-primary transition-colors p-1 rounded hover:bg-primary/10"
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors p-1 rounded hover:bg-primary/10"
             title={note.isParked ? 'Move to Now' : 'Park for Later'}
           >
             {note.isParked ? (
@@ -69,7 +69,7 @@ const NoteCard = memo(({ note, onSelect, onToggleParked, onRequestDelete }: Note
         )}
         <button
           onClick={() => onRequestDelete(note.id)}
-          className="flex items-center gap-1 text-xs text-text-muted/70 hover:text-destructive transition-all p-1 rounded hover:bg-destructive/10"
+          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-all p-1 rounded hover:bg-destructive/10"
         >
           <Trash2 className="w-3 h-3" />
         </button>
@@ -79,7 +79,7 @@ const NoteCard = memo(({ note, onSelect, onToggleParked, onRequestDelete }: Note
       <div className="md:hidden" onClick={(e) => e.stopPropagation()}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="p-1 text-text-muted hover:text-text-secondary transition-colors">
+            <button className="p-1 text-muted-foreground hover:text-text-secondary transition-colors">
               <MoreHorizontal className="w-4 h-4" />
             </button>
           </DropdownMenuTrigger>
@@ -212,7 +212,7 @@ export function NotepadTwoColumn({
       <div className="flex items-center justify-between mb-5">
         <div>
           <h3 className="text-sm font-medium text-foreground">Notes</h3>
-          <p className="text-xs text-text-muted mt-0.5">Now and later</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Now and later</p>
         </div>
         {!isExpanded && (
           <Button
@@ -229,14 +229,14 @@ export function NotepadTwoColumn({
       {/* Parked suggestion from AI */}
       {parkedSuggestion && (
         <div className="mb-4 p-3 bg-surface/30 border border-border/10 rounded-lg animate-fade-in">
-          <p className="text-xs text-text-muted mb-2">
+          <p className="text-xs text-muted-foreground mb-2">
             You parked this thought earlier. Want to bring it back?
           </p>
           <p className="text-sm text-text-secondary italic">"{parkedSuggestion}"</p>
           <div className="flex gap-2 mt-3">
             <button
               onClick={onDismissParkedSuggestion}
-              className="text-xs text-text-muted hover:text-text-secondary transition-colors"
+              className="text-xs text-muted-foreground hover:text-text-secondary transition-colors"
             >
               Not now
             </button>
@@ -254,7 +254,7 @@ export function NotepadTwoColumn({
             placeholder="Dump a thought..."
             rows={2}
             autoFocus
-            className="w-full bg-card/60 border border-border/20 rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-text-muted/60 focus:outline-none focus:border-primary/30 resize-none"
+            className="w-full bg-card/60 border border-border/20 rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:border-primary/30 resize-none"
           />
           <div className="flex justify-end gap-2 mt-2">
             <Button
@@ -282,10 +282,10 @@ export function NotepadTwoColumn({
       <div className="flex-1 min-h-0 flex flex-col gap-6 overflow-hidden">
         {/* Active Notes Section */}
         <div className="flex flex-col min-h-0 flex-1">
-          <p className="text-xs text-text-muted/70 uppercase tracking-wider mb-3">Now</p>
+          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3">Now</p>
           <div className="flex-1 overflow-y-auto space-y-2 pr-1">
             {activeNotes.length === 0 ? (
-              <p className="text-xs text-text-muted/50 py-4 text-center">
+              <p className="text-xs text-muted-foreground py-4 text-center">
                 Clear for now.
               </p>
             ) : (
@@ -304,10 +304,10 @@ export function NotepadTwoColumn({
 
         {/* Parked Notes Section */}
         <div className="flex flex-col min-h-0 flex-1">
-          <p className="text-xs text-text-muted/70 uppercase tracking-wider mb-3">Later</p>
+          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3">Later</p>
           <div className="flex-1 overflow-y-auto space-y-2 pr-1">
             {parkedNotes.length === 0 ? (
-              <p className="text-xs text-text-muted/50 py-4 text-center">
+              <p className="text-xs text-muted-foreground py-4 text-center">
                 Nothing parked.
               </p>
             ) : (

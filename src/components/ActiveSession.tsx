@@ -185,7 +185,7 @@ export function ActiveSession({
                   px-4 py-2 rounded-full text-sm transition-all
                   ${stopReason === 'skipped'
                     ? 'bg-foreground/10 text-foreground border border-foreground/20'
-                    : 'bg-transparent text-text-muted/60 border border-border/10 hover:border-border/30'
+                    : 'bg-transparent text-muted-foreground border border-border/10 hover:border-border/30'
                   }
                 `}
               >
@@ -211,7 +211,7 @@ export function ActiveSession({
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Anything worth remembering?"
                 rows={2}
-                className="w-full bg-card/40 backdrop-blur-sm border border-border/20 rounded-xl px-6 py-4 text-foreground placeholder:text-text-muted/50 focus:outline-none focus:border-border/40 resize-none transition-all duration-300"
+                className="w-full bg-card/40 backdrop-blur-sm border border-border/20 rounded-xl px-6 py-4 text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:border-border/40 resize-none transition-all duration-300"
               />
             )}
           </div>
@@ -306,7 +306,7 @@ export function ActiveSession({
             variant="ghost"
             size="sm"
             onClick={handleDistractionClick}
-            className="w-full text-text-muted/60 hover:text-text-muted border border-dashed border-text-muted/20 hover:border-text-muted/40"
+            className="w-full text-muted-foreground hover:text-text-muted border border-dashed border-text-muted/20 hover:border-text-muted/40"
           >
             Distracted?
           </Button>
@@ -344,7 +344,7 @@ export function ActiveSession({
       )}
 
       {/* Ambient quote */}
-      <p className="text-sm text-text-muted/40 text-center font-serif italic pt-8">
+      <p className="text-sm text-muted-foreground/70 text-center font-serif italic pt-8">
         Stay present. Stay put.
       </p>
     </div>

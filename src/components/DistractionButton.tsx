@@ -60,7 +60,7 @@ export function DistractionButton({ hasActiveSession, taskName }: DistractionBut
               </p>
               <button
                 onClick={handleDismiss}
-                className="text-text-muted/50 hover:text-text-muted transition-colors p-1 -mt-1 -mr-1"
+                className="text-muted-foreground/70 hover:text-muted-foreground transition-colors p-1 -mt-1 -mr-1"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -75,7 +75,7 @@ export function DistractionButton({ hasActiveSession, taskName }: DistractionBut
         size="sm"
         onClick={handleDrift}
         disabled={isLoading}
-        className="w-full text-text-muted/60 hover:text-text-muted border border-dashed border-text-muted/20 hover:border-text-muted/40"
+        className="w-full text-muted-foreground hover:text-muted-foreground border border-dashed border-text-muted/20 hover:border-text-muted/40"
       >
         {isLoading ? (
           <Loader2 className="w-4 h-4 animate-spin" />

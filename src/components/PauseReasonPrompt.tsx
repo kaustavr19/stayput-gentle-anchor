@@ -38,7 +38,7 @@ export function PauseReasonPrompt({ onSubmit, onSkip }: PauseReasonPromptProps) 
         <p className="text-sm text-text-secondary">Why are you pausing?</p>
         <button
           onClick={onSkip}
-          className="text-text-muted/50 hover:text-text-muted transition-colors"
+          className="text-muted-foreground/70 hover:text-muted-foreground transition-colors"
         >
           <X className="w-4 h-4" />
         </button>
@@ -52,14 +52,14 @@ export function PauseReasonPrompt({ onSubmit, onSkip }: PauseReasonPromptProps) 
             onChange={(e) => setCustomReason(e.target.value)}
             placeholder="What's pulling you away?"
             autoFocus
-            className="w-full bg-surface/50 border border-border/20 rounded-lg px-4 py-2 text-sm text-foreground placeholder:text-text-muted/50 focus:outline-none focus:border-border/40"
+            className="w-full bg-surface/50 border border-border/20 rounded-lg px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:border-border/40"
           />
           <div className="flex gap-2">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setSelected(null)}
-              className="text-text-muted"
+              className="text-muted-foreground"
             >
               Back
             </Button>
@@ -77,14 +77,14 @@ export function PauseReasonPrompt({ onSubmit, onSkip }: PauseReasonPromptProps) 
             <button
               key={value}
               onClick={() => handleSelect(value)}
-              className="px-4 py-2 rounded-full text-sm transition-all bg-transparent text-text-muted border border-border/20 hover:border-border/40 hover:text-text-secondary"
+              className="px-4 py-2 rounded-full text-sm transition-all bg-transparent text-muted-foreground border border-border/20 hover:border-border/40 hover:text-text-secondary"
             >
               {label}
             </button>
           ))}
           <button
             onClick={onSkip}
-            className="px-4 py-2 rounded-full text-sm transition-all text-text-muted/60 border border-border/10 hover:border-border/30"
+            className="px-4 py-2 rounded-full text-sm transition-all text-muted-foreground border border-border/10 hover:border-border/30"
           >
             Skip
           </button>

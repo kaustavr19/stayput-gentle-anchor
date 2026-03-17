@@ -17,9 +17,9 @@ export function FocusTimer({ elapsedSeconds, formattedTime: _f, isPaused, target
       <div className="text-center animate-fade-in">
         <p className="text-xs text-muted-foreground uppercase tracking-widest mb-3">Break time</p>
         <div className="text-5xl font-extralight text-foreground tracking-wider tabular-nums">
-          {pad(bm)}<span className="text-muted-foreground/35 mx-1 animate-pulse-soft">:</span>{pad(bs)}
+          {pad(bm)}<span className="text-muted-foreground/60 mx-1 animate-pulse-soft">:</span>{pad(bs)}
         </div>
-        <p className="text-xs text-muted-foreground/55 mt-2 font-serif italic">Rest. You earned it.</p>
+        <p className="text-xs text-muted-foreground mt-2 font-serif italic">Rest. You earned it.</p>
       </div>
     );
   }
@@ -77,11 +77,11 @@ export function FocusTimer({ elapsedSeconds, formattedTime: _f, isPaused, target
         {hrs > 0 && (
           <>
             <span>{pad(hrs)}</span>
-            <span className="text-muted-foreground/30 mx-1">:</span>
+            <span className="text-muted-foreground/60 mx-1">:</span>
           </>
         )}
         <span>{pad(mins)}</span>
-        <span className="text-muted-foreground/30 mx-1">:</span>
+        <span className="text-muted-foreground/60 mx-1">:</span>
         <span>{pad(secs)}</span>
       </div>
       {isPaused && (
