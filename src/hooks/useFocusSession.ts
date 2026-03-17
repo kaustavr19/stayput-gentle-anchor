@@ -11,6 +11,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from './useAuth';
+import { updateLeaderboard } from './useLeaderboard';
 
 // ─── Conversion helpers ────────────────────────────────────────────────────
 
@@ -238,8 +239,15 @@ export function useFocusSession() {
     setActiveSession(null);
     setIsInBreak(false);
     await syncSession(updated);
+    // Award XP to leaderboard
+    if (user) {
+      const displayName = user.displayName ?? user.email?.split('@')[0] ?? 'Anonymous';
+      updateLeaderboard(user.uid, displayName, user.photoURL ?? null, updated).catch(
+        err => console.error('[StayPut] Leaderboard update failed', err),
+      );
+    }
     return updated;
-  }, [activeSession, addActivity, syncSession]);
+  }, [activeSession, addActivity, syncSession, user]);
 
   // ── Pomodoro break controls ───────────────────────────────────────────
   const startBreak = useCallback(() => { setIsInBreak(true); setBreakTimeLeft(5 * 60); }, []);

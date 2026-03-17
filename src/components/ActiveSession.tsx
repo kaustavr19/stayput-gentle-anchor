@@ -130,7 +130,7 @@ export function ActiveSession({
 
         <div className="space-y-4">
           <p className="text-sm text-text-secondary">Did you finish?</p>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             {[
               { value: 'yes' as const, label: 'Yes', icon: Check },
               { value: 'partially' as const, label: 'Partially', icon: Minus },
@@ -230,13 +230,13 @@ export function ActiveSession({
   }
 
   return (
-    <div className="space-y-12 animate-fade-in">
+    <div className="space-y-8 sm:space-y-12 animate-fade-in">
       {/* Current task — pinned, editorial */}
       <div className="space-y-3 pt-4">
         <p className="text-xs text-text-muted/70 uppercase tracking-widest">
           {isPaused ? 'Paused' : 'Currently focused on'}
         </p>
-        <h2 className="text-2xl font-light text-foreground leading-relaxed">
+        <h2 className="text-xl sm:text-2xl font-light text-foreground leading-relaxed">
           {session.taskName}
         </h2>
         {session.context && (

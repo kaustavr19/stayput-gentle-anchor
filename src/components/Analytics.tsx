@@ -120,7 +120,7 @@ export function Analytics({ sessions }: AnalyticsProps) {
   }
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-5 sm:space-y-8 animate-fade-in">
       <div className="space-y-1.5">
         <h1 className="text-2xl font-serif font-medium text-foreground">Analytics</h1>
         <p className="text-sm text-muted-foreground">A record of your attention.</p>

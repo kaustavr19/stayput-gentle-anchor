@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { Focus, StickyNote, History, Sparkles, BarChart2, Sun, Moon, LogOut, User } from 'lucide-react';
+import { Focus, StickyNote, History, Sparkles, BarChart2, Trophy, Sun, Moon, LogOut, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Logo } from '@/components/Logo';
 
-export type AppTab = 'focus' | 'notes' | 'history' | 'analytics' | 'ai';
+export type AppTab = 'focus' | 'notes' | 'history' | 'analytics' | 'ai' | 'leaderboard';
 
 interface LayoutProps {
   children: ReactNode;
@@ -17,11 +17,12 @@ interface LayoutProps {
 }
 
 const tabs = [
-  { id: 'focus'     as const, label: 'Focus',     icon: Focus,     comingSoon: false },
-  { id: 'notes'     as const, label: 'Notes',     icon: StickyNote, comingSoon: false },
-  { id: 'history'   as const, label: 'History',   icon: History,   comingSoon: false },
-  { id: 'analytics' as const, label: 'Analytics', icon: BarChart2, comingSoon: false },
-  { id: 'ai'        as const, label: 'Assist',    icon: Sparkles,  comingSoon: true  },
+  { id: 'focus'       as const, label: 'Focus',     icon: Focus,     comingSoon: false },
+  { id: 'notes'       as const, label: 'Notes',     icon: StickyNote, comingSoon: false },
+  { id: 'history'     as const, label: 'History',   icon: History,   comingSoon: false },
+  { id: 'analytics'   as const, label: 'Analytics', icon: BarChart2, comingSoon: false },
+  { id: 'leaderboard' as const, label: 'Leaders',   icon: Trophy,    comingSoon: false },
+  { id: 'ai'          as const, label: 'Assist',    icon: Sparkles,  comingSoon: true  },
 ];
 
 export function Layout({ children, activeTab, onTabChange, sideContent }: LayoutProps) {
@@ -39,7 +40,7 @@ export function Layout({ children, activeTab, onTabChange, sideContent }: Layout
             <Logo />
 
             {/* Nav tabs — pill style */}
-            <nav className="flex items-center gap-0.5">
+            <nav className="hidden lg:flex items-center gap-0.5">
               {tabs.map(({ id, label, icon: Icon, comingSoon }) => (
                 <button
                   key={id}
@@ -103,7 +104,7 @@ export function Layout({ children, activeTab, onTabChange, sideContent }: Layout
       </header>
 
       {/* Main content */}
-      <main className="flex-1 flex px-4 py-5">
+      <main className="flex-1 flex px-4 py-5 pb-24 lg:pb-5">
         <div className="flex-1 max-w-7xl mx-auto flex gap-6">
           {/* Primary panel */}
           <div className="flex-1 min-w-0">
@@ -122,6 +123,28 @@ export function Layout({ children, activeTab, onTabChange, sideContent }: Layout
           )}
         </div>
       </main>
+
+      {/* Mobile bottom nav — hidden on lg+ */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-border/60 glass">
+        <div className="flex items-center justify-around px-1 py-2">
+          {tabs.map(({ id, label, icon: Icon, comingSoon }) => (
+            <button
+              key={id}
+              onClick={() => onTabChange(id)}
+              className={cn(
+                "relative flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl min-w-[44px] transition-colors",
+                activeTab === id ? "text-primary" : "text-muted-foreground"
+              )}
+            >
+              <Icon className="w-5 h-5" />
+              <span className="text-[9px] font-medium leading-none">{label}</span>
+              {comingSoon && (
+                <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-primary/60" />
+              )}
+            </button>
+          ))}
+        </div>
+      </nav>
 
       {/* Footer mantra */}
       <footer className="px-4 py-4">
