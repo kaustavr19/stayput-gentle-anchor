@@ -54,3 +54,13 @@ export interface AppState {
 
 export type PauseReason = 'break' | 'distracted' | 'switching' | 'energy' | 'other' | 'skip';
 export type DistractionCause = 'youtube' | 'context_switching' | 'notification' | 'overthinking' | 'fatigue' | 'other' | 'skip';
+
+export interface Task {
+  id: string;
+  goalId: string;
+  goalText: string;
+  text: string;
+  status: 'pending' | 'in-progress' | 'done';
+  order: number;
+  createdAt: Date;
+}

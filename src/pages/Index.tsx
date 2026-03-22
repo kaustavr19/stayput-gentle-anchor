@@ -5,7 +5,7 @@ import { ActiveSession } from '@/components/ActiveSession';
 import { NotesLanes } from '@/components/NotesLanes';
 import { NotepadTwoColumn } from '@/components/NotepadTwoColumn';
 import { SessionHistory } from '@/components/SessionHistory';
-import { AssistComingSoon } from '@/components/AssistComingSoon';
+import { Assist } from '@/components/Assist';
 import { Analytics } from '@/components/Analytics';
 import { Leaderboard } from '@/components/Leaderboard';
 import { useFocusSession } from '@/hooks/useFocusSession';
@@ -134,7 +134,7 @@ const Index = () => {
         return <Analytics sessions={sessions} />;
 
       case 'ai':
-        return <AssistComingSoon />;
+        return <Assist />;
 
       case 'leaderboard':
         return <Leaderboard />;
