@@ -1,5 +1,5 @@
 const GEMINI_ENDPOINT =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent';
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
 const LS_KEY = 'stayput_gemini_key';
 
@@ -46,12 +46,8 @@ Example: ["Research the fundamentals using free resources", "Set up your local d
   if (!res.ok) {
     const body = await res.json().catch(() => ({})) as { error?: { message?: string } };
     const msg = body?.error?.message ?? `HTTP ${res.status}`;
-    // Surface actionable messages for common errors
     if (res.status === 400 && msg.toLowerCase().includes('api key')) {
       throw new Error('Invalid API key. Please check your Gemini API key and try again.');
-    }
-    if (res.status === 429) {
-      throw new Error('Rate limit reached. Please wait a moment and try again.');
     }
     throw new Error(`Gemini error: ${msg}`);
   }
