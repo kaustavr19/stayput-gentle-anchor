@@ -143,9 +143,9 @@ export function Leaderboard() {
       )}
 
       {/* XP guide */}
-      <div className="border-t border-border/60 pt-4">
-        <p className="text-xs font-medium text-muted-foreground mb-2">How XP is earned</p>
-        <div className="grid grid-cols-3 gap-2 text-xs text-muted-foreground">
+      <div className="border-t border-border/60 pt-4 space-y-3">
+        <p className="text-xs font-medium text-muted-foreground">How XP is earned</p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs text-muted-foreground">
           <div className="rounded-lg bg-muted/40 px-2.5 py-2 text-center">
             <p className="font-medium text-foreground">Open</p>
             <p>1 XP / min</p>
@@ -158,6 +158,14 @@ export function Leaderboard() {
             <p className="font-medium text-foreground">Deep Work</p>
             <p>2 XP / min<br/>+50 XP bonus</p>
           </div>
+          <div className="rounded-lg bg-muted/40 px-2.5 py-2 text-center">
+            <p className="font-medium text-foreground">Custom</p>
+            <p>1.5 XP / min</p>
+          </div>
+        </div>
+        <div className="rounded-lg bg-muted/40 px-2.5 py-2 text-xs text-muted-foreground flex items-center justify-between">
+          <span className="font-medium text-foreground">Assist task completed</span>
+          <span>+10 XP per task</span>
         </div>
       </div>
     </div>

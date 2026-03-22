@@ -1,10 +1,15 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import { FocusSession } from '@/types';
 import { format, subDays, startOfDay, isSameDay } from 'date-fns';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell,
 } from 'recharts';
+import { Sparkles, RotateCcw, Loader2 } from 'lucide-react';
+import {
+  generateAnalyticsInsight, getCachedInsight, getInsightCacheKey,
+  getGeminiApiKey, AnalyticsInsight, AnalyticsSummary,
+} from '@/lib/gemini';
 
 interface AnalyticsProps {
   sessions: FocusSession[];
@@ -92,6 +97,53 @@ export function Analytics({ sessions }: AnalyticsProps) {
     return { totalMins, totalDistractions, completionRate, avgMins, totalSessions: completed.length };
   }, [completed]);
 
+  // ── AI insight ─────────────────────────────────────────────────────────
+  const insightSummary: AnalyticsSummary = useMemo(() => ({
+    recentSessions: completed.filter(s => {
+      const days7ago = subDays(new Date(), 7);
+      return new Date(s.startedAt) >= days7ago;
+    }).length,
+    totalFocusMins: stats.totalMins,
+    avgSessionMins: stats.avgMins,
+    completionRate: stats.completionRate,
+    topDistractions: distractionData.map(d => ({ name: d.name, count: d.value })),
+    topContexts: contextData.map(c => ({ name: c.name, mins: c.value })),
+  }), [completed, stats, distractionData, contextData]);
+
+  const cacheKey = useMemo(() => getInsightCacheKey(insightSummary), [insightSummary]);
+  const [insight, setInsight] = useState<AnalyticsInsight | null>(() => getCachedInsight(cacheKey));
+  const [insightLoading, setInsightLoading] = useState(false);
+  const [insightError, setInsightError] = useState<string | null>(null);
+  const apiKey = getGeminiApiKey();
+
+  const fetchInsight = useCallback(async () => {
+    if (!apiKey || insightLoading) return;
+    setInsightLoading(true);
+    setInsightError(null);
+    try {
+      const result = await generateAnalyticsInsight(insightSummary, apiKey);
+      setInsight(result);
+    } catch (err) {
+      setInsightError(err instanceof Error ? err.message : 'Failed to load insight');
+    } finally {
+      setInsightLoading(false);
+    }
+  }, [apiKey, insightSummary, insightLoading]);
+
+  // Auto-fetch when cache is stale (new data, no cached insight)
+  useEffect(() => {
+    if (apiKey && !insight && !insightLoading && completed.length >= 2) {
+      fetchInsight();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cacheKey]);
+
+  // Re-check cache when cacheKey changes (new session ended)
+  useEffect(() => {
+    const cached = getCachedInsight(cacheKey);
+    if (cached) setInsight(cached);
+  }, [cacheKey]);
+
   const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: { value: number }[]; label?: string }) => {
     if (active && payload?.length) {
       return (
@@ -140,6 +192,55 @@ export function Analytics({ sessions }: AnalyticsProps) {
           </div>
         ))}
       </div>
+
+      {/* AI Insight panel */}
+      {apiKey && (
+        <div className="card-surface rounded-xl p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-3.5 h-3.5 text-primary" />
+              <p className="text-sm font-medium text-foreground">Your week at a glance</p>
+            </div>
+            <button
+              onClick={fetchInsight}
+              disabled={insightLoading}
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-40"
+            >
+              {insightLoading
+                ? <Loader2 className="w-3 h-3 animate-spin" />
+                : <RotateCcw className="w-3 h-3" />}
+              {insightLoading ? 'Thinking…' : 'Refresh'}
+            </button>
+          </div>
+
+          {insightError && (
+            <p className="text-xs text-destructive">{insightError}</p>
+          )}
+
+          {!insight && !insightLoading && !insightError && (
+            <p className="text-xs text-muted-foreground italic">
+              Complete at least 2 sessions to generate an insight.
+            </p>
+          )}
+
+          {insight && (
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <p className="text-[10px] uppercase tracking-wider text-primary/70 font-medium">What's working</p>
+                <p className="text-sm text-foreground leading-relaxed">{insight.strength}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-[10px] uppercase tracking-wider text-amber-600/70 dark:text-amber-400/70 font-medium">Pattern to watch</p>
+                <p className="text-sm text-foreground leading-relaxed">{insight.pattern}</p>
+              </div>
+              <div className="rounded-lg bg-primary/[0.05] border border-primary/10 px-4 py-3 space-y-1">
+                <p className="text-[10px] uppercase tracking-wider text-primary/70 font-medium">This week's tip</p>
+                <p className="text-sm text-foreground leading-relaxed">{insight.tip}</p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Focus this week */}
       <div className="card-surface rounded-xl p-5 space-y-4">

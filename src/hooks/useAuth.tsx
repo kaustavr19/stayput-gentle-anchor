@@ -7,8 +7,12 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
+  deleteUser as firebaseDeleteUser,
 } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import {
+  collection, getDocs, deleteDoc, doc, writeBatch,
+} from 'firebase/firestore';
+import { auth, db } from '@/lib/firebase';
 
 interface AuthContextType {
   user: User | null;
@@ -17,6 +21,8 @@ interface AuthContextType {
   signInWithEmail: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUpWithEmail: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
+  clearAccountData: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -61,8 +67,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await firebaseSignOut(auth);
   };
 
+  /** Deletes all Firestore data for the current user but keeps the auth account. */
+  const clearAccountData = async () => {
+    if (!user) return;
+    for (const colName of ['sessions', 'tasks', 'notes']) {
+      const snap = await getDocs(collection(db, 'users', user.uid, colName));
+      if (snap.size > 0) {
+        const batch = writeBatch(db);
+        snap.docs.forEach(d => batch.delete(d.ref));
+        await batch.commit();
+      }
+    }
+    await deleteDoc(doc(db, 'leaderboard', user.uid));
+  };
+
+  /** Clears all account data then permanently deletes the Firebase auth account. */
+  const deleteAccount = async () => {
+    if (!user) return;
+    await clearAccountData();
+    await firebaseDeleteUser(user);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signInWithEmail, signUpWithEmail, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signInWithEmail, signUpWithEmail, signOut, clearAccountData, deleteAccount }}>
       {children}
     </AuthContext.Provider>
   );
