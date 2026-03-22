@@ -31,24 +31,40 @@ StayPut is designed to help you focus without the noise. It provides a soothing,
 - **Micro-Rituals** — Small, calm prompts to ease you into work mode.
 - **Tiny Wins** — A brief celebratory message when you complete a session.
 
+### Assist (AI Goal Planner)
+- Enter a goal and StayPut generates a step-by-step action plan via **Groq AI** (Llama 3.1 · genuinely free tier).
+- Review the plan, deselect steps you don't need, and add the rest as trackable tasks.
+- Track each task through **pending → in-progress → done**. Completing a task awards **+10 XP** to the leaderboard.
+- Disagree with a plan? Regenerate it, download it as a `.txt`, or start over.
+- Existing goals are shown with a live progress bar so you can pick up where you left off.
+- Your Groq API key is stored locally (never sent to our servers). A gentle usage nudge reminds you of Groq's free-tier limits (30 req/min, 14 400/day).
+
 ### Analytics
 - 7-day focus bar chart
 - Context breakdown pie chart (writing, coding, designing, …)
 - Distraction cause breakdown
 - Session count, total focused time, and average session length
+- **AI Insight** — "Your week at a glance" card powered by Groq: a strength, a pattern, and a tip derived from your recent sessions. Cached in `localStorage` and auto-refreshed when your data changes; manual refresh button always available.
 
 ### Leaderboard
 - Global leaderboard showing top 50 users by XP.
-- XP is awarded per session based on mode and duration — Open 1 XP/min, Pomodoro 1.5×/min + 15 bonus, Deep Work 2×/min + 50 bonus, Custom 1.5×/min.
+- XP is awarded per session based on mode and duration — Open 1 XP/min, Pomodoro 1.5×/min + 15 bonus, Deep Work 2×/min + 50 bonus, Custom 1.5×/min, Assist task +10 XP each.
 - Tiers: Bronze → Silver (100 XP) → Gold (500 XP) → Platinum (2 000 XP).
 - Leaderboard is backfilled on login from all historical session data, so it populates immediately for returning users.
 
+### Profile Menu
+- The header avatar+chevron opens a dropdown replacing the old logout button.
+- **User info** — name and email at a glance.
+- **Manage API key** — view your masked Groq key or remove it entirely.
+- **Clear account data** — deletes all sessions, tasks, and notes from Firestore with an inline confirmation.
+- **Delete account** — full data wipe + Firebase Auth account deletion, with a full-screen overlay confirmation dialog.
+- **Sign out** — ends the session cleanly.
+
 ### Platform
-- **Auth + Cloud Sync** — Sign in with Google or email/password. Sessions, notes, and leaderboard data sync to Firestore.
+- **Auth + Cloud Sync** — Sign in with Google or email/password. Sessions, notes, tasks, and leaderboard data sync to Firestore.
 - **Mobile Responsive** — Fixed bottom nav on small screens; all layouts adapt down to 375 px.
 - **WCAG AA Contrast** — Text colours meet AA contrast ratios across both light and dark modes.
 - **Light / Dark Mode** — Light by default, with a toggle for dark.
-- **Assist Tab** — Coming soon.
 
 ---
 
@@ -62,6 +78,7 @@ StayPut is designed to help you focus without the noise. It provides a soothing,
 | Fonts | [Plus Jakarta Sans](https://fonts.google.com/specimen/Plus+Jakarta+Sans) (body) + [Fraunces](https://fonts.google.com/specimen/Fraunces) (display) |
 | Charts | [Recharts](https://recharts.org/) |
 | Auth & DB | [Firebase](https://firebase.google.com/) (Auth + Firestore) |
+| AI | [Groq](https://groq.com/) (`llama-3.1-8b-instant`) — free tier |
 | Sound | Web Audio API (no external audio files) |
 | Deployment | [Vercel](https://vercel.com/) |
 
@@ -88,14 +105,9 @@ StayPut is designed to help you focus without the noise. It provides a soothing,
    npm install
    ```
 
-3. Create a `.env` file in the project root (Firebase config values are embedded in `src/lib/firebase.ts` as they are client-safe public identifiers):
-   ```env
-   # No required env vars for the core app.
-   # Add Supabase vars below only if you are wiring up the Assist tab AI features in future.
-   # VITE_SUPABASE_PROJECT_ID="your-project-id"
-   # VITE_SUPABASE_PUBLISHABLE_KEY="your-anon-key"
-   # VITE_SUPABASE_URL="https://your-project-id.supabase.co"
-   ```
+3. Firebase config values are embedded in `src/lib/firebase.ts` as they are client-safe public identifiers. No `.env` file is required for the core app.
+
+   > **Groq AI features** (Assist tab + Analytics insight) require a free Groq API key. Get one at [console.groq.com/keys](https://console.groq.com/keys) and enter it in-app via the Assist tab setup screen or the Profile menu. The key is stored in `localStorage` under `stayput_groq_key` — never sent to any server other than Groq.
 
 4. Start the development server:
    ```bash
@@ -132,13 +144,27 @@ StayPut is designed to help you focus without the noise. It provides a soothing,
 
 ```
 src/
-├── components/       # UI components (ActiveSession, Analytics, FocusTimer, Leaderboard, …)
-├── hooks/            # useAuth, useFocusSession, useLeaderboard, useNotes, useAppState
-├── lib/              # firebase.ts, sounds.ts
-├── pages/            # Index.tsx (main app), Auth.tsx
-└── types/            # Shared TypeScript types (SessionMode, FocusSession, Note, …)
-firestore.rules       # Firestore security rules
-vercel.json           # SPA routing config for Vercel
+├── components/       # UI components
+│   ├── ActiveSession.tsx   # Timer UI, sounds, break flow
+│   ├── Analytics.tsx       # Charts + AI insight card
+│   ├── Assist.tsx          # AI goal planner + task tracker
+│   ├── Leaderboard.tsx     # XP rankings + tier guide
+│   ├── ProfileMenu.tsx     # Avatar dropdown (API key, clear data, delete account)
+│   └── …                  # FocusTimer, DistractionLog, ParkingLot, etc.
+├── hooks/
+│   ├── useAuth.tsx         # Auth + clearAccountData + deleteAccount
+│   ├── useFocusSession.ts  # Session state, break flow, custom timer
+│   ├── useLeaderboard.ts   # XP logic, backfill, awardTaskXP
+│   ├── useTasks.ts         # Firestore task CRUD, grouped by goal
+│   └── …
+├── lib/
+│   ├── firebase.ts         # Firestore + Auth init
+│   ├── gemini.ts           # Groq API client (goal plans + analytics insight + caching)
+│   └── sounds.ts           # Web Audio API: playDing, playCompletionTune
+├── pages/                  # Index.tsx (main app), Auth.tsx
+└── types/                  # SessionMode, FocusSession, Note, Task, …
+firestore.rules             # Firestore security rules
+vercel.json                 # SPA routing config for Vercel
 ```
 
 ---
@@ -158,7 +184,7 @@ StayPut is opinionated software:
 
 | Version | Description |
 |---|---|
-| v3 (current) | Custom timer, Web Audio completion tones, 30-min open-mode ding, break reminders, leaderboard backfill, mobile responsiveness, WCAG AA contrast fixes |
+| v3 (current) | Groq AI Assist tab (goal planner + task tracking), Analytics AI insight, Profile menu with account management, Task XP (+10 per completed task), Custom timer mode, Web Audio completion tones, 30-min open-mode ding, dynamic break durations, leaderboard backfill |
 | v2 | Firebase auth + Firestore sync, Analytics dashboard, Pomodoro + Deep Work modes, Opera Air-inspired UI, leaderboard with XP system |
 | v1 | Local-first, `localStorage` only, no auth |
 
