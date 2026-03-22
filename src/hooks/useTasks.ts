@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { awardTaskXP } from './useLeaderboard';
 import {
   collection,
   query,
@@ -90,6 +91,13 @@ export function useTasks() {
   ): Promise<void> => {
     if (!user) return;
     await updateDoc(doc(db, 'users', user.uid, 'tasks', taskId), { status });
+    // Award XP when a task is completed
+    if (status === 'done') {
+      const displayName = user.displayName ?? user.email?.split('@')[0] ?? 'Anonymous';
+      awardTaskXP(user.uid, displayName, user.photoURL ?? null).catch(
+        err => console.error('[StayPut] Task XP award failed', err),
+      );
+    }
   }, [user]);
 
   /** Delete all tasks belonging to a goal. */

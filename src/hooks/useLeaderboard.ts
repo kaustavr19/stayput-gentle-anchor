@@ -124,6 +124,27 @@ export async function updateLeaderboard(
   );
 }
 
+// ─── Award XP for a completed Assist task (10 XP each) ───────────────────────
+
+export const TASK_XP = 10;
+
+export async function awardTaskXP(
+  uid: string,
+  displayName: string,
+  photoURL: string | null,
+): Promise<void> {
+  await setDoc(
+    doc(db, 'leaderboard', uid),
+    {
+      displayName,
+      photoURL,
+      totalXP: increment(TASK_XP),
+      updatedAt: Timestamp.now(),
+    },
+    { merge: true },
+  );
+}
+
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export function useLeaderboard() {

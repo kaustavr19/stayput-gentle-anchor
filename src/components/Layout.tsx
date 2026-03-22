@@ -1,11 +1,12 @@
 import { ReactNode } from 'react';
-import { Focus, StickyNote, History, Sparkles, BarChart2, Trophy, Sun, Moon, LogOut, User } from 'lucide-react';
+import { Focus, StickyNote, History, Sparkles, BarChart2, Trophy, Sun, Moon, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Logo } from '@/components/Logo';
+import { ProfileMenu } from '@/components/ProfileMenu';
 
 export type AppTab = 'focus' | 'notes' | 'history' | 'analytics' | 'ai' | 'leaderboard';
 
@@ -28,7 +29,7 @@ const tabs = [
 export function Layout({ children, activeTab, onTabChange, sideContent }: LayoutProps) {
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -77,16 +78,7 @@ export function Layout({ children, activeTab, onTabChange, sideContent }: Layout
               </Button>
 
               {user ? (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => signOut()}
-                  title="Sign out"
-                  className="h-8 w-8 rounded-xl text-muted-foreground hover:text-foreground"
-                >
-                  <LogOut className="w-3.5 h-3.5" />
-                  <span className="sr-only">Sign out</span>
-                </Button>
+                <ProfileMenu />
               ) : (
                 <Button
                   variant="ghost"

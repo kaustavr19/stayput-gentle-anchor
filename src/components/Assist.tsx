@@ -151,7 +151,7 @@ export function Assist() {
 
   const { goals, isLoading: tasksLoading, addGoalTasks, updateTaskStatus, deleteGoal } = useTasks();
 
-  // ── Gemini call ──────────────────────────────────────────────────────────
+  // ── AI call (Groq / Llama 3.1) ───────────────────────────────────────────
   const runGenerate = async (goal: string) => {
     setError(null);
     setShowDisagreement(false);
@@ -233,32 +233,39 @@ export function Assist() {
             <h2 className="text-lg font-light text-foreground">Set up Assist</h2>
           </div>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Assist uses Google's Gemini 1.5 Flash — free to use, no credit card needed.
-            Get your free API key from Google AI Studio, then paste it below.
+            Assist uses Groq's free API (Llama 3.1) — no credit card needed, generous limits.
+            Create a free account at Groq, then grab your API key.
           </p>
           <a
-            href="https://aistudio.google.com/app/apikey"
+            href="https://console.groq.com/keys"
             target="_blank"
             rel="noreferrer"
             className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
           >
-            Get your free API key <ExternalLink className="w-3.5 h-3.5" />
+            Get your free Groq API key <ExternalLink className="w-3.5 h-3.5" />
           </a>
         </div>
 
         <div className="space-y-2">
-          <label className="text-xs text-muted-foreground uppercase tracking-wider">Gemini API Key</label>
+          <label className="text-xs text-muted-foreground uppercase tracking-wider">Groq API Key</label>
           <input
             type="password"
             value={apiKeyInput}
             onChange={e => setApiKeyInput(e.target.value)}
-            placeholder="AIzaSy..."
+            placeholder="gsk_..."
             autoComplete="off"
             className="w-full bg-card/40 backdrop-blur-sm border border-border/30 rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-border/60 transition-all"
             onKeyDown={e => { if (e.key === 'Enter') handleSetupSave(); }}
           />
           <p className="text-xs text-muted-foreground/60">
             Stored in your browser only. Never sent to our servers.
+          </p>
+        </div>
+
+        <div className="rounded-xl border border-border/30 bg-muted/20 px-4 py-3 space-y-1">
+          <p className="text-xs font-medium text-muted-foreground">A note on usage</p>
+          <p className="text-xs text-muted-foreground/80 leading-relaxed">
+            Groq's free tier is generous (30 requests/min, 14,400/day) but shared across all your activity. Assist caches plans and insights so it only calls the API when something genuinely changes — still, use it thoughtfully.
           </p>
         </div>
 
@@ -490,6 +497,11 @@ export function Assist() {
           Your goal plans will appear here once created.
         </p>
       )}
+
+      {/* Rate limit nudge */}
+      <p className="text-[11px] text-muted-foreground/40 text-center pt-2">
+        Groq free tier · 30 req/min · use mindfully
+      </p>
     </div>
   );
 }
