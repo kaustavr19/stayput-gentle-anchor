@@ -22,7 +22,7 @@ const tabs = [
   { id: 'history'     as const, label: 'History',   icon: History,   comingSoon: false },
   { id: 'analytics'   as const, label: 'Analytics', icon: BarChart2, comingSoon: false },
   { id: 'leaderboard' as const, label: 'Leaders',   icon: Trophy,    comingSoon: false },
-  { id: 'ai'          as const, label: 'Assist',    icon: Sparkles,  comingSoon: true  },
+  { id: 'ai'          as const, label: 'Assist',    icon: Sparkles,  comingSoon: false },
 ];
 
 export function Layout({ children, activeTab, onTabChange, sideContent }: LayoutProps) {
