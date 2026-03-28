@@ -1,11 +1,12 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { playDing, playCompletionTune } from '@/lib/sounds';
 import { FocusSession, PauseReason, DistractionCause } from '@/types';
 import { FocusTimer } from './FocusTimer';
 import { PauseReasonPrompt } from './PauseReasonPrompt';
 import { DistractionPrompt } from './DistractionPrompt';
 import { Button } from '@/components/ui/button';
-import { Square, Check, Minus, X, ChevronDown, ChevronUp, Pause, Play } from 'lucide-react';
+import { Square, Check, Minus, X, ChevronDown, ChevronUp, Pause, Play, Maximize2, Minimize2 } from 'lucide-react';
 
 interface ActiveSessionProps {
   session: FocusSession;
@@ -46,6 +47,17 @@ export function ActiveSession({
   const [timerCompleteDismissed, setTimerCompleteDismissed] = useState(false);
   const showTimerCompletePrompt = isTimerComplete && !timerCompleteDismissed;
 
+  // Fullscreen distraction-blocker
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Escape key exits fullscreen
+  useEffect(() => {
+    if (!isFullscreen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setIsFullscreen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isFullscreen]);
+
   // 30-min milestone tracking for open mode
   const lastMilestone = useRef(0);
   const completionSoundPlayed = useRef(false);
@@ -82,6 +94,7 @@ export function ActiveSession({
   const [showDistractionPrompt, setShowDistractionPrompt] = useState(false);
 
   const handleEndClick = useCallback(() => {
+    setIsFullscreen(false);
     setShowReflection(true);
   }, []);
 
@@ -275,7 +288,7 @@ export function ActiveSession({
       </div>
 
       {/* Timer — centered, calm */}
-      <div className="flex justify-center py-8">
+      <div className="relative flex justify-center py-8">
         <FocusTimer
           elapsedSeconds={elapsedTime}
           formattedTime={formattedTime}
@@ -284,6 +297,13 @@ export function ActiveSession({
           isInBreak={isInBreak}
           breakTimeLeft={breakTimeLeft}
         />
+        <button
+          onClick={() => setIsFullscreen(true)}
+          title="Focus fullscreen (distraction blocker)"
+          className="absolute top-0 right-0 p-1.5 text-muted-foreground/25 hover:text-muted-foreground/60 transition-colors"
+        >
+          <Maximize2 className="w-4 h-4" />
+        </button>
       </div>
 
       {/* Timer complete prompt (Pomodoro / Deep Work) */}
@@ -403,6 +423,168 @@ export function ActiveSession({
       <p className="text-sm text-muted-foreground/70 text-center font-serif italic pt-8">
         Stay present. Stay put.
       </p>
+
+      {/* Fullscreen distraction-blocker overlay */}
+      {isFullscreen && createPortal(
+        <div className="fixed inset-0 z-[200] flex flex-col overflow-hidden">
+          <style>{`
+            @keyframes fsGrad {
+              0%   { background-position: 0%   50%; }
+              50%  { background-position: 100% 50%; }
+              100% { background-position: 0%   50%; }
+            }
+            /* Light mode — warm pastel shifts */
+            .fs-bg {
+              background: linear-gradient(-45deg, #f5ede0, #dff0e8, #e8e0f5, #ddeef5, #f5dde8);
+              background-size: 400% 400%;
+              animation: fsGrad 18s ease infinite;
+            }
+            /* Dark mode — deeper hue shifts */
+            .dark .fs-bg {
+              background: linear-gradient(-45deg, #0d1b30, #0b2018, #1e0d30, #0b1e2e, #200d14);
+              background-size: 400% 400%;
+              animation: fsGrad 18s ease infinite;
+            }
+          `}</style>
+
+          {/* Animated gradient background */}
+          <div className="fs-bg absolute inset-0" />
+
+          {/* Exit button */}
+          <button
+            onClick={() => setIsFullscreen(false)}
+            title="Exit fullscreen (Esc)"
+            className="absolute top-5 right-5 z-10 p-2 rounded-full text-foreground/20 hover:text-foreground/55 hover:bg-foreground/5 transition-all"
+          >
+            <Minimize2 className="w-5 h-5" />
+          </button>
+
+          {/* Session topic — upper area */}
+          <div className="relative z-10 flex flex-col items-center pt-[13vh] px-8 text-center">
+            <p className="text-[10px] uppercase tracking-[0.25em] text-foreground/30">
+              {isPaused ? 'Paused' : isInBreak ? 'On a break' : 'Currently focused on'}
+            </p>
+            <h2 className="mt-4 text-xl sm:text-2xl font-light text-foreground/70 leading-relaxed max-w-md">
+              {session.taskName}
+            </h2>
+            {session.context && (
+              <span className="mt-3 inline-block px-3 py-1 text-[11px] text-foreground/30 bg-foreground/5 rounded-full">
+                {session.context}
+              </span>
+            )}
+          </div>
+
+          {/* Timer — true center */}
+          <div className="relative z-10 flex-1 flex items-center justify-center">
+            <div className="scale-[1.8] sm:scale-[2.2] origin-center">
+              <FocusTimer
+                elapsedSeconds={elapsedTime}
+                formattedTime={formattedTime}
+                isPaused={isPaused}
+                targetDuration={session.targetDuration}
+                isInBreak={isInBreak}
+                breakTimeLeft={breakTimeLeft}
+              />
+            </div>
+          </div>
+
+          {/* Bottom CTAs */}
+          <div className="relative z-10 flex flex-col items-center gap-3 pb-[8vh] px-8">
+
+            {/* Timer complete prompt */}
+            {showTimerCompletePrompt && !isInBreak && (() => {
+              const isDeep = session.sessionMode === 'deep';
+              const isCustom = session.sessionMode === 'custom';
+              const label = isDeep
+                ? '90 minutes done — time to recharge.'
+                : isCustom ? "Time's up — take a break?" : '25 minutes done — short break?';
+              const breakMins = isDeep ? 20 : 5;
+              const breakLabel = isDeep ? '20 min break' : '5 min break';
+              return (
+                <div className="rounded-xl border border-foreground/10 bg-foreground/5 backdrop-blur-sm px-5 py-4 text-center space-y-3 w-64">
+                  <p className="text-sm text-foreground/65">{label}</p>
+                  <div className="flex gap-2 justify-center">
+                    <button onClick={() => { setTimerCompleteDismissed(true); onStartBreak?.(breakMins); }} className="text-xs text-foreground/65 border border-foreground/20 hover:border-foreground/40 rounded-lg px-4 py-1.5 transition-colors">
+                      {breakLabel}
+                    </button>
+                    <button onClick={() => { setTimerCompleteDismissed(true); onSkipBreak?.(); }} className="text-xs text-foreground/35 hover:text-foreground/55 rounded-lg px-3 py-1.5 transition-colors">
+                      Keep going
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* 30-min milestone */}
+            {showMilestoneBreak && !isInBreak && (
+              <div className="rounded-xl border border-foreground/10 bg-foreground/5 backdrop-blur-sm px-5 py-4 text-center space-y-3 w-64">
+                <p className="text-sm text-foreground/65">{Math.floor(elapsedTime / 1800) * 30} min in — consider a pause.</p>
+                <div className="flex gap-2 justify-center">
+                  <button onClick={() => { setShowMilestoneBreak(false); onStartBreak?.(5); }} className="text-xs text-foreground/65 border border-foreground/20 hover:border-foreground/40 rounded-lg px-4 py-1.5 transition-colors">
+                    Rest 5 min
+                  </button>
+                  <button onClick={() => setShowMilestoneBreak(false)} className="text-xs text-foreground/35 hover:text-foreground/55 rounded-lg px-3 py-1.5 transition-colors">
+                    Keep going
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Break skip */}
+            {isInBreak && (
+              <button onClick={onSkipBreak} className="text-xs text-foreground/35 hover:text-foreground/60 border border-foreground/10 hover:border-foreground/25 rounded-full px-5 py-2 transition-all">
+                Skip break
+              </button>
+            )}
+
+            {/* Pause / Distraction prompts inside fullscreen */}
+            {showPausePrompt && (
+              <div className="w-full max-w-xs">
+                <PauseReasonPrompt onSubmit={handlePauseSubmit} onSkip={handlePauseSkip} />
+              </div>
+            )}
+            {showDistractionPrompt && (
+              <div className="w-full max-w-xs">
+                <DistractionPrompt taskName={session.taskName} onSubmit={handleDistractionSubmit} onSkip={handleDistractionSkip} />
+              </div>
+            )}
+
+            {/* Main action buttons */}
+            {!showPausePrompt && !showDistractionPrompt && (
+              <div className="flex flex-col items-center gap-2.5 w-64">
+                <button
+                  onClick={handleDistractionClick}
+                  className="w-full text-xs text-foreground/25 hover:text-foreground/50 border border-dashed border-foreground/12 hover:border-foreground/25 rounded-xl py-2.5 transition-all"
+                >
+                  Distracted?
+                </button>
+                {isPaused ? (
+                  <button
+                    onClick={onResume}
+                    className="w-full flex items-center justify-center gap-2 text-sm text-foreground/60 hover:text-foreground/80 border border-foreground/20 hover:border-foreground/35 rounded-xl py-2.5 transition-all"
+                  >
+                    <Play className="w-4 h-4" /> Resume
+                  </button>
+                ) : (
+                  <button
+                    onClick={handlePauseClick}
+                    className="w-full flex items-center justify-center gap-2 text-xs text-foreground/25 hover:text-foreground/50 border border-foreground/12 hover:border-foreground/25 rounded-xl py-2.5 transition-all"
+                  >
+                    <Pause className="w-3.5 h-3.5" /> Pause
+                  </button>
+                )}
+                <button
+                  onClick={handleEndClick}
+                  className="w-full flex items-center justify-center gap-2 text-xs text-foreground/15 hover:text-foreground/35 border border-foreground/8 hover:border-foreground/15 rounded-xl py-2.5 transition-all"
+                >
+                  <Square className="w-3 h-3" /> End session
+                </button>
+              </div>
+            )}
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
