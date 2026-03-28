@@ -426,61 +426,60 @@ export function ActiveSession({
 
       {/* Fullscreen distraction-blocker overlay */}
       {isFullscreen && createPortal(
-        <div className="fixed inset-0 z-[200] flex flex-col overflow-hidden">
+        <div className="dark fixed inset-0 z-[200] flex flex-col overflow-hidden">
           <style>{`
             @keyframes morph1 {
-              0%,100% { border-radius:60% 40% 30% 70%/60% 30% 70% 40%; transform:translate(0,0) scale(1); }
-              25%     { border-radius:30% 60% 70% 40%/50% 60% 30% 60%; transform:translate(35px,-45px) scale(1.08); }
-              50%     { border-radius:50% 60% 30% 60%/30% 40% 70% 50%; transform:translate(55px,25px) scale(1.12); }
-              75%     { border-radius:70% 30% 50% 50%/40% 60% 40% 60%; transform:translate(-25px,40px) scale(0.94); }
+              0%,100% { border-radius:60% 40% 30% 70%/60% 30% 70% 40%; transform:translate(0,0) scale(1) rotate(0deg); }
+              25%     { border-radius:30% 60% 70% 40%/50% 60% 30% 60%; transform:translate(35px,-45px) scale(1.08) rotate(25deg); }
+              50%     { border-radius:50% 60% 30% 60%/30% 40% 70% 50%; transform:translate(55px,25px) scale(1.12) rotate(55deg); }
+              75%     { border-radius:70% 30% 50% 50%/40% 60% 40% 60%; transform:translate(-25px,40px) scale(0.94) rotate(80deg); }
             }
             @keyframes morph2 {
-              0%,100% { border-radius:40% 60% 60% 40%/40% 50% 60% 50%; transform:translate(0,0) scale(1); }
-              33%     { border-radius:60% 40% 30% 60%/70% 30% 60% 40%; transform:translate(-45px,35px) scale(1.10); }
-              66%     { border-radius:30% 50% 60% 40%/50% 60% 40% 60%; transform:translate(25px,-55px) scale(0.90); }
+              0%,100% { border-radius:40% 60% 60% 40%/40% 50% 60% 50%; transform:translate(0,0) scale(1) rotate(0deg); }
+              33%     { border-radius:60% 40% 30% 60%/70% 30% 60% 40%; transform:translate(-45px,35px) scale(1.10) rotate(-30deg); }
+              66%     { border-radius:30% 50% 60% 40%/50% 60% 40% 60%; transform:translate(25px,-55px) scale(0.90) rotate(-65deg); }
             }
             @keyframes morph3 {
-              0%,100% { border-radius:50% 50% 40% 60%/50% 60% 40% 50%; transform:translate(0,0) scale(1); }
-              50%     { border-radius:60% 40% 60% 40%/40% 50% 60% 50%; transform:translate(40px,50px) scale(1.14); }
+              0%,100% { border-radius:50% 50% 40% 60%/50% 60% 40% 50%; transform:translate(0,0) scale(1) rotate(0deg); }
+              50%     { border-radius:60% 40% 60% 40%/40% 50% 60% 50%; transform:translate(40px,50px) scale(1.14) rotate(45deg); }
             }
             @keyframes morph4 {
-              0%,100% { border-radius:70% 30% 40% 60%/30% 70% 50% 50%; transform:translate(0,0) scale(1); }
-              40%     { border-radius:40% 60% 70% 30%/60% 40% 30% 70%; transform:translate(-35px,-35px) scale(1.08); }
-              80%     { border-radius:50% 50% 30% 70%/70% 30% 60% 40%; transform:translate(45px,40px) scale(0.88); }
+              0%,100% { border-radius:70% 30% 40% 60%/30% 70% 50% 50%; transform:translate(0,0) scale(1) rotate(0deg); }
+              40%     { border-radius:40% 60% 70% 30%/60% 40% 30% 70%; transform:translate(-35px,-35px) scale(1.08) rotate(35deg); }
+              80%     { border-radius:50% 50% 30% 70%/70% 30% 60% 40%; transform:translate(45px,40px) scale(0.88) rotate(70deg); }
             }
-            .fs-bg { background:#f8f7f5; }
-            .dark .fs-bg { background:#06060f; }
+            @keyframes breathe {
+              0%,100% { opacity:0.80; }
+              50%      { opacity:1; }
+            }
+            .fs-blobs { animation:breathe 9s ease-in-out infinite; }
             .fs-b1 { width:70vw;height:70vw;top:-25%;left:-20%;
-              background:radial-gradient(circle,rgba(251,113,133,0.75) 0%,transparent 60%);
+              background:radial-gradient(circle,rgba(99,102,241,0.88) 0%,transparent 60%);
               filter:blur(55px);animation:morph1 19s ease-in-out infinite; }
             .fs-b2 { width:62vw;height:62vw;top:-12%;right:-20%;
-              background:radial-gradient(circle,rgba(167,139,250,0.72) 0%,transparent 60%);
+              background:radial-gradient(circle,rgba(236,72,153,0.75) 0%,transparent 60%);
               filter:blur(52px);animation:morph2 23s ease-in-out infinite; }
             .fs-b3 { width:66vw;height:66vw;bottom:-20%;left:2%;
-              background:radial-gradient(circle,rgba(52,211,153,0.68) 0%,transparent 60%);
+              background:radial-gradient(circle,rgba(20,184,166,0.78) 0%,transparent 60%);
               filter:blur(60px);animation:morph3 27s ease-in-out infinite; }
             .fs-b4 { width:52vw;height:52vw;bottom:0%;right:-15%;
-              background:radial-gradient(circle,rgba(251,191,36,0.60) 0%,transparent 60%);
+              background:radial-gradient(circle,rgba(245,158,11,0.58) 0%,transparent 60%);
               filter:blur(50px);animation:morph4 21s ease-in-out infinite; }
             .fs-b5 { width:45vw;height:45vw;top:35%;left:25%;
-              background:radial-gradient(circle,rgba(56,189,248,0.55) 0%,transparent 60%);
+              background:radial-gradient(circle,rgba(59,130,246,0.72) 0%,transparent 60%);
               filter:blur(58px);animation:morph2 30s ease-in-out infinite reverse; }
-            .dark .fs-b1 { background:radial-gradient(circle,rgba(99,102,241,0.88) 0%,transparent 60%); }
-            .dark .fs-b2 { background:radial-gradient(circle,rgba(236,72,153,0.75) 0%,transparent 60%); }
-            .dark .fs-b3 { background:radial-gradient(circle,rgba(20,184,166,0.78) 0%,transparent 60%); }
-            .dark .fs-b4 { background:radial-gradient(circle,rgba(245,158,11,0.58) 0%,transparent 60%); }
-            .dark .fs-b5 { background:radial-gradient(circle,rgba(59,130,246,0.72) 0%,transparent 60%); }
           `}</style>
 
-          {/* Morphing blob background */}
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="fs-bg absolute inset-0" />
-            <div className="fs-b1 absolute" />
-            <div className="fs-b2 absolute" />
-            <div className="fs-b3 absolute" />
-            <div className="fs-b4 absolute" />
-            <div className="fs-b5 absolute" />
-            <div className="absolute inset-0 bg-white/20 dark:bg-black/25" />
+          {/* Morphing blob background — always dark */}
+          <div className="absolute inset-0 overflow-hidden bg-[#06060f]">
+            <div className="fs-blobs absolute inset-0">
+              <div className="fs-b1 absolute" />
+              <div className="fs-b2 absolute" />
+              <div className="fs-b3 absolute" />
+              <div className="fs-b4 absolute" />
+              <div className="fs-b5 absolute" />
+            </div>
+            <div className="absolute inset-0 bg-black/20" />
           </div>
 
           {/* Exit button */}
