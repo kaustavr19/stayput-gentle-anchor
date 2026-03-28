@@ -428,62 +428,59 @@ export function ActiveSession({
       {isFullscreen && createPortal(
         <div className="fixed inset-0 z-[200] flex flex-col overflow-hidden">
           <style>{`
-            @keyframes blob1 {
-              0%,100% { transform: translate(0,0) scale(1); }
-              33%      { transform: translate(45px,-65px) scale(1.18); }
-              66%      { transform: translate(-35px,35px) scale(0.90); }
+            @keyframes morph1 {
+              0%,100% { border-radius:60% 40% 30% 70%/60% 30% 70% 40%; transform:translate(0,0) scale(1); }
+              25%     { border-radius:30% 60% 70% 40%/50% 60% 30% 60%; transform:translate(35px,-45px) scale(1.08); }
+              50%     { border-radius:50% 60% 30% 60%/30% 40% 70% 50%; transform:translate(55px,25px) scale(1.12); }
+              75%     { border-radius:70% 30% 50% 50%/40% 60% 40% 60%; transform:translate(-25px,40px) scale(0.94); }
             }
-            @keyframes blob2 {
-              0%,100% { transform: translate(0,0) scale(1); }
-              33%      { transform: translate(-55px,45px) scale(1.12); }
-              66%      { transform: translate(35px,-45px) scale(0.85); }
+            @keyframes morph2 {
+              0%,100% { border-radius:40% 60% 60% 40%/40% 50% 60% 50%; transform:translate(0,0) scale(1); }
+              33%     { border-radius:60% 40% 30% 60%/70% 30% 60% 40%; transform:translate(-45px,35px) scale(1.10); }
+              66%     { border-radius:30% 50% 60% 40%/50% 60% 40% 60%; transform:translate(25px,-55px) scale(0.90); }
             }
-            @keyframes blob3 {
-              0%,100% { transform: translate(0,0) scale(1); }
-              50%      { transform: translate(40px,60px) scale(1.15); }
+            @keyframes morph3 {
+              0%,100% { border-radius:50% 50% 40% 60%/50% 60% 40% 50%; transform:translate(0,0) scale(1); }
+              50%     { border-radius:60% 40% 60% 40%/40% 50% 60% 50%; transform:translate(40px,50px) scale(1.14); }
             }
-            @keyframes blob4 {
-              0%,100% { transform: translate(0,0) scale(1); }
-              40%      { transform: translate(-50px,-35px) scale(1.10); }
-              80%      { transform: translate(25px,55px) scale(0.92); }
+            @keyframes morph4 {
+              0%,100% { border-radius:70% 30% 40% 60%/30% 70% 50% 50%; transform:translate(0,0) scale(1); }
+              40%     { border-radius:40% 60% 70% 30%/60% 40% 30% 70%; transform:translate(-35px,-35px) scale(1.08); }
+              80%     { border-radius:50% 50% 30% 70%/70% 30% 60% 40%; transform:translate(45px,40px) scale(0.88); }
             }
-            /* ── base ── */
-            .fs-bg { background: #f8f7f5; }
-            .dark .fs-bg { background: #06060f; }
-            /* ── light blobs ── */
-            .fs-b1 { width:65vw;height:65vw;top:-20%;left:-15%;
-              background:radial-gradient(circle,rgba(251,113,133,0.80) 0%,transparent 65%);
-              filter:blur(64px);animation:blob1 17s ease-in-out infinite; }
-            .fs-b2 { width:58vw;height:58vw;top:-8%;right:-18%;
-              background:radial-gradient(circle,rgba(167,139,250,0.75) 0%,transparent 65%);
-              filter:blur(58px);animation:blob2 21s ease-in-out infinite; }
-            .fs-b3 { width:55vw;height:55vw;bottom:-18%;left:5%;
-              background:radial-gradient(circle,rgba(52,211,153,0.72) 0%,transparent 65%);
-              filter:blur(68px);animation:blob3 24s ease-in-out infinite; }
-            .fs-b4 { width:48vw;height:48vw;bottom:2%;right:-12%;
-              background:radial-gradient(circle,rgba(251,191,36,0.62) 0%,transparent 65%);
-              filter:blur(54px);animation:blob4 19s ease-in-out infinite; }
-            .fs-b5 { width:42vw;height:42vw;top:38%;left:28%;
-              background:radial-gradient(circle,rgba(56,189,248,0.60) 0%,transparent 65%);
-              filter:blur(62px);animation:blob1 27s ease-in-out infinite reverse; }
-            /* ── dark blobs ── */
-            .dark .fs-b1 { background:radial-gradient(circle,rgba(99,102,241,0.90) 0%,transparent 65%); }
-            .dark .fs-b2 { background:radial-gradient(circle,rgba(236,72,153,0.78) 0%,transparent 65%); }
-            .dark .fs-b3 { background:radial-gradient(circle,rgba(20,184,166,0.80) 0%,transparent 65%); }
-            .dark .fs-b4 { background:radial-gradient(circle,rgba(245,158,11,0.60) 0%,transparent 65%); }
-            .dark .fs-b5 { background:radial-gradient(circle,rgba(59,130,246,0.75) 0%,transparent 65%); }
+            .fs-bg { background:#f8f7f5; }
+            .dark .fs-bg { background:#06060f; }
+            .fs-b1 { width:70vw;height:70vw;top:-25%;left:-20%;
+              background:radial-gradient(circle,rgba(251,113,133,0.75) 0%,transparent 60%);
+              filter:blur(55px);animation:morph1 19s ease-in-out infinite; }
+            .fs-b2 { width:62vw;height:62vw;top:-12%;right:-20%;
+              background:radial-gradient(circle,rgba(167,139,250,0.72) 0%,transparent 60%);
+              filter:blur(52px);animation:morph2 23s ease-in-out infinite; }
+            .fs-b3 { width:66vw;height:66vw;bottom:-20%;left:2%;
+              background:radial-gradient(circle,rgba(52,211,153,0.68) 0%,transparent 60%);
+              filter:blur(60px);animation:morph3 27s ease-in-out infinite; }
+            .fs-b4 { width:52vw;height:52vw;bottom:0%;right:-15%;
+              background:radial-gradient(circle,rgba(251,191,36,0.60) 0%,transparent 60%);
+              filter:blur(50px);animation:morph4 21s ease-in-out infinite; }
+            .fs-b5 { width:45vw;height:45vw;top:35%;left:25%;
+              background:radial-gradient(circle,rgba(56,189,248,0.55) 0%,transparent 60%);
+              filter:blur(58px);animation:morph2 30s ease-in-out infinite reverse; }
+            .dark .fs-b1 { background:radial-gradient(circle,rgba(99,102,241,0.88) 0%,transparent 60%); }
+            .dark .fs-b2 { background:radial-gradient(circle,rgba(236,72,153,0.75) 0%,transparent 60%); }
+            .dark .fs-b3 { background:radial-gradient(circle,rgba(20,184,166,0.78) 0%,transparent 60%); }
+            .dark .fs-b4 { background:radial-gradient(circle,rgba(245,158,11,0.58) 0%,transparent 60%); }
+            .dark .fs-b5 { background:radial-gradient(circle,rgba(59,130,246,0.72) 0%,transparent 60%); }
           `}</style>
 
-          {/* Layered blob background */}
+          {/* Morphing blob background */}
           <div className="absolute inset-0 overflow-hidden">
             <div className="fs-bg absolute inset-0" />
-            <div className="fs-b1 absolute rounded-full" />
-            <div className="fs-b2 absolute rounded-full" />
-            <div className="fs-b3 absolute rounded-full" />
-            <div className="fs-b4 absolute rounded-full" />
-            <div className="fs-b5 absolute rounded-full" />
-            {/* Subtle frosted wash to unify and aid legibility */}
-            <div className="absolute inset-0 bg-white/25 dark:bg-black/30" />
+            <div className="fs-b1 absolute" />
+            <div className="fs-b2 absolute" />
+            <div className="fs-b3 absolute" />
+            <div className="fs-b4 absolute" />
+            <div className="fs-b5 absolute" />
+            <div className="absolute inset-0 bg-white/20 dark:bg-black/25" />
           </div>
 
           {/* Exit button */}
